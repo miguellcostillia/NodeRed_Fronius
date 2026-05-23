@@ -1,1 +1,16 @@
+# Node-RED Credentials / Secrets
+flows_cred.json
+*.cred.json
+.credentials.json
+
+# Node modules
+node_modules/
+
+# Logs / Backups
+*.log
 *.backup
+*.bak
+.npm/
+
+# Runtime / context
+.context/
