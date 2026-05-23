@@ -52,7 +52,7 @@
         "y": 60,
         "wires": [
             [
-                "f773bfc7eed15a41"
+                "06b5b11380be17f1"
             ]
         ]
     },
@@ -97,7 +97,27 @@
         ]
     },
     {
-        "id": "f773bfc7eed15a41",
+        "id": "06b5b11380be17f1",
+        "type": "function",
+        "z": "6301e7be3ca6daa7",
+        "name": "Daten_auswerten",
+        "func": "// ======================================================\n// NODE: Verto_HTTP_auswerten\n// Zweck:\n// - Fronius PowerFlowRealtimeData auswerten\n// - P_Grid, P_Load, P_PV, P_Akku und SOC robust extrahieren\n// - Werte im flow context speichern\n// - KEINE Regelentscheidung hier\n// ======================================================\n\nconst DEBUG = true;\n\n// ------------------------------------------------------\n// Hilfsfunktionen\n// ------------------------------------------------------\nfunction asNumber(v) {\n    if (v === null || v === undefined) return null;\n    const n = Number(v);\n    return Number.isFinite(n) ? n : null;\n}\n\nfunction pickNumber(...values) {\n    for (const v of values) {\n        const n = asNumber(v);\n        if (n !== null) return n;\n    }\n    return null;\n}\n\n// ------------------------------------------------------\n// Fronius PowerFlow Struktur\n// ------------------------------------------------------\nconst data = msg.payload?.Body?.Data || {};\nconst site = data.Site || {};\nconst inverters = data.Inverters || {};\n\n// Meist gibt es nur Inverter \"1\"\nconst inv1 =\n    inverters[\"1\"] ||\n    inverters[1] ||\n    Object.values(inverters)[0] ||\n    {};\n\n// ------------------------------------------------------\n// Werte lesen\n// ------------------------------------------------------\n\n// P_Grid:\n// typischerweise:\n//   > 0 = Netzbezug\n//   < 0 = Einspeisung\nconst gridPowerW = pickNumber(\n    site.P_Grid,\n    msg.grid_power_w,\n    msg.payload?.grid_power_w\n);\n\n// P_Load:\n// bei Fronius oft negativ, wir speichern Hausverbrauch positiv\nconst pLoadRaw = pickNumber(\n    site.P_Load,\n    msg.house_load_w,\n    msg.payload?.house_load_w\n);\n\nconst houseLoadW = pLoadRaw !== null ? Math.abs(pLoadRaw) : null;\n\nconst pvPowerW = pickNumber(\n    site.P_PV,\n    msg.pv_power_w,\n    msg.payload?.pv_power_w\n);\n\n// P_Akku / P_Battery:\n// Vorzeichen kann je nach Fronius-Ansicht unterschiedlich sein.\n// Wir speichern erstmal roh und ändern NICHTS blind.\nconst batteryPowerRawW = pickNumber(\n    site.P_Akku,\n    site.P_Battery,\n    msg.battery_power_raw_w,\n    msg.payload?.battery_power_raw_w\n);\n\n// SOC kann je nach Endpoint im Inverter-Block oder Site liegen\nconst socPercent = pickNumber(\n    inv1.SOC,\n    site.SOC,\n    msg.soc_percent,\n    msg.payload?.soc_percent\n);\n\n// Battery Mode, falls vorhanden\nconst batteryMode =\n    inv1.Battery_Mode ||\n    inv1.battery_mode ||\n    site.Battery_Mode ||\n    msg.battery_mode ||\n    msg.payload?.battery_mode ||\n    null;\n\n// ------------------------------------------------------\n// Plausibilitätscheck\n// ------------------------------------------------------\nif (gridPowerW === null) {\n    node.error(\"P_Grid / grid_power_w nicht gefunden\", msg);\n    return null;\n}\n\nif (houseLoadW === null) {\n    node.warn(\"P_Load / house_load_w nicht gefunden, Regelung kann später nur mit P_Grid arbeiten\");\n}\n\n// ------------------------------------------------------\n// flow context speichern\n// ------------------------------------------------------\nflow.set(\"fronius_grid_power_w\", gridPowerW);\nflow.set(\"fronius_house_load_w\", houseLoadW);\nflow.set(\"fronius_pv_power_w\", pvPowerW);\nflow.set(\"fronius_battery_power_raw_w\", batteryPowerRawW);\nflow.set(\"fronius_soc_percent\", socPercent);\nflow.set(\"fronius_battery_mode\", batteryMode);\nflow.set(\"fronius_http_last_seen\", Date.now());\n\n// Für spätere Functions auch auf msg schreiben\nmsg.ok = true;\nmsg.source = \"fronius_powerflow\";\n\nmsg.grid_power_w = gridPowerW;\nmsg.house_load_w = houseLoadW;\nmsg.pv_power_w = pvPowerW;\nmsg.battery_power_raw_w = batteryPowerRawW;\nmsg.soc_percent = socPercent;\nmsg.battery_mode = batteryMode;\n\nif (DEBUG) {\n    msg.debug_fronius = {\n        grid_power_w: gridPowerW,\n        grid_meaning:\n            gridPowerW > 0 ? \"Netzbezug\" :\n            gridPowerW < 0 ? \"Einspeisung\" :\n            \"Null\",\n        house_load_w: houseLoadW,\n        pv_power_w: pvPowerW,\n        battery_power_raw_w: batteryPowerRawW,\n        soc_percent: socPercent,\n        battery_mode: batteryMode,\n        last_seen: new Date().toISOString()\n    };\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 150,
+        "y": 120,
+        "wires": [
+            [
+                "ac6813dd5e2dcb18"
+            ]
+        ]
+    },
+    {
+        "id": "ac6813dd5e2dcb18",
         "type": "debug",
         "z": "6301e7be3ca6daa7",
         "name": "debug 1",
@@ -105,12 +125,163 @@
         "tosidebar": true,
         "console": false,
         "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
+        "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 840,
-        "y": 60,
+        "x": 360,
+        "y": 120,
         "wires": []
+    },
+    {
+        "id": "c3ee9fab24291908",
+        "type": "inject",
+        "z": "6301e7be3ca6daa7",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 100,
+        "y": 300,
+        "wires": [
+            [
+                "27537240031a7b38"
+            ]
+        ]
+    },
+    {
+        "id": "27537240031a7b38",
+        "type": "http request",
+        "z": "6301e7be3ca6daa7",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://api.forecast.solar/estimate/48.30/14.29/30/-30/18",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 270,
+        "y": 300,
+        "wires": [
+            [
+                "d2cd407777295942"
+            ]
+        ]
+    },
+    {
+        "id": "d6ad4b2eae628ddc",
+        "type": "function",
+        "z": "6301e7be3ca6daa7",
+        "name": "Forcast_V6",
+        "func": "// ======================================================\n// NODE: Forecast_auswerten_V6\n// Zweck:\n// - forecast.solar Response auswerten\n// - result.watt_hours_period pro Europe/Vienna-Kalendertag summieren\n// - heute, morgen, übermorgen in kWh berechnen\n// - Werte im flow-Speicher ablegen\n// - V6: noch keine finale Steuerentscheidung, nur Forecast-Daten\n// ======================================================\n\nfunction viennaDateString(offsetDays = 0) {\n    const fmt = new Intl.DateTimeFormat(\"sv-SE\", {\n        timeZone: \"Europe/Vienna\",\n        year: \"numeric\",\n        month: \"2-digit\",\n        day: \"2-digit\"\n    });\n\n    const now = new Date();\n    const todayStr = fmt.format(now);\n\n    // Mittagszeit verhindert DST-/Zeitzonen-Kantenprobleme\n    const base = new Date(`${todayStr}T12:00:00`);\n    base.setDate(base.getDate() + offsetDays);\n\n    return fmt.format(base);\n}\n\nfunction round1(x) {\n    return Math.round(x * 10) / 10;\n}\n\nfunction sumWhForDate(wattHoursPeriod, dateStr) {\n    let sumWh = 0;\n    let points = 0;\n\n    for (const [ts, whRaw] of Object.entries(wattHoursPeriod || {})) {\n        if (!ts.startsWith(dateStr)) continue;\n\n        const wh = Number(whRaw);\n        if (!Number.isFinite(wh)) continue;\n\n        sumWh += wh;\n        points++;\n    }\n\n    return {\n        kwh: round1(sumWh / 1000),\n        points\n    };\n}\n\n// Payload robust behandeln\nlet payload = msg.payload;\n\nif (typeof payload === \"string\") {\n    try {\n        payload = JSON.parse(payload);\n    } catch (e) {\n        payload = {};\n    }\n}\n\nconst whPeriod = payload?.result?.watt_hours_period;\n\nconst todayDate = viennaDateString(0);\nconst tomorrowDate = viennaDateString(1);\nconst dayAfterTomorrowDate = viennaDateString(2);\n\nlet source = \"forecast.solar/watt_hours_period\";\nlet usedFallback = false;\n\nlet today = { kwh: 0, points: 0 };\nlet tomorrow = { kwh: 0, points: 0 };\nlet dayAfterTomorrow = { kwh: 0, points: 0 };\n\nif (whPeriod && typeof whPeriod === \"object\") {\n    today = sumWhForDate(whPeriod, todayDate);\n    tomorrow = sumWhForDate(whPeriod, tomorrowDate);\n    dayAfterTomorrow = sumWhForDate(whPeriod, dayAfterTomorrowDate);\n\n    if (today.points + tomorrow.points + dayAfterTomorrow.points === 0) {\n        usedFallback = true;\n        source = \"fallback_no_matching_dates\";\n    }\n} else {\n    usedFallback = true;\n    source = \"fallback_missing_watt_hours_period\";\n}\n\n// Flow-Speicher für Strategie_V6\nflow.set(\"forecast_today_kwh\", today.kwh);\nflow.set(\"forecast_tomorrow_kwh\", tomorrow.kwh);\nflow.set(\"forecast_day_after_tomorrow_kwh\", dayAfterTomorrow.kwh);\n\nflow.set(\"forecast_today_date\", todayDate);\nflow.set(\"forecast_tomorrow_date\", tomorrowDate);\nflow.set(\"forecast_day_after_tomorrow_date\", dayAfterTomorrowDate);\n\nflow.set(\"forecast_source\", source);\nflow.set(\"forecast_used_fallback\", usedFallback);\nflow.set(\"forecast_updated_at\", new Date().toISOString());\n\n// Abwärtskompatibel für alte Nodes\nflow.set(\"forecast_kwh\", today.kwh);\nflow.set(\"forecast_date\", todayDate);\n\n// Debug-Ausgabe\nmsg.payload = {\n    ok: !usedFallback,\n    source,\n    used_fallback: usedFallback,\n    forecast: {\n        today: {\n            date: todayDate,\n            kwh: today.kwh,\n            points: today.points\n        },\n        tomorrow: {\n            date: tomorrowDate,\n            kwh: tomorrow.kwh,\n            points: tomorrow.points\n        },\n        day_after_tomorrow: {\n            date: dayAfterTomorrowDate,\n            kwh: dayAfterTomorrow.kwh,\n            points: dayAfterTomorrow.points\n        }\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ecdcb465f6afbd11",
+        "type": "debug",
+        "z": "6301e7be3ca6daa7",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "d2cd407777295942",
+        "type": "json",
+        "z": "6301e7be3ca6daa7",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 410,
+        "y": 300,
+        "wires": [
+            [
+                "d6ad4b2eae628ddc"
+            ]
+        ]
+    },
+    {
+        "id": "b095a4c7d3d9ff0b",
+        "type": "function",
+        "z": "6301e7be3ca6daa7",
+        "name": "Strategie_V6_Debug",
+        "func": "// ======================================================\n// NODE: Strategie_V6_Debug\n// Zweck:\n// - V6 Strategieentscheidung nur als Debug berechnen\n// - Eigenverbrauch hat oberste Priorität\n// - Forecast heute + morgen bewerten\n// - Winter-/Reserve-Logik berücksichtigen\n// - Ladeblockade bis 10:30 vorbereiten\n// - Entladung morgens vorbereiten\n// - Noch KEIN Modbus-Schreiben\n// ======================================================\n\n// ===============================\n// KONFIGURATION\n// ===============================\n\n// OutWRte / InWRte bleiben prozentbasiert:\n// 0     = 0 %\n// 10000 = 100 %\nconst OUTWRTE_MAX = 10000;\n\n// Bezugsleistung nur zur Umrechnung Hauslast -> OutWRte.\n// Keine Speicher-kWh-Logik, damit spätere Speichererweiterung möglich bleibt.\nconst BATTERY_POWER_REF_W = 16600;\n\n// Zeitfenster Europe/Vienna\nconst DISCHARGE_START_MIN = 4 * 60 + 30;   // 04:30\nconst DISCHARGE_END_MIN   = 8 * 60;        // 08:00\n\nconst CHARGE_BLOCK_START_MIN = 6 * 60;     // 06:00\nconst CHARGE_BLOCK_END_MIN   = 10 * 60 + 30; // 10:30\n\n// Sicherheitsabstände\nconst SOC_MARGIN_FOR_ACTION = 5;   // Aktion nur wenn SOC mindestens min_soc + 5 %\nconst CHARGE_BLOCK_MARGIN = 10;    // Ladeblockade nur wenn SOC mindestens min_soc + 10 %\n\n// ===============================\n// HILFSFUNKTIONEN\n// ===============================\n\nfunction clamp(num, min, max) {\n    return Math.min(Math.max(num, min), max);\n}\n\nfunction round1(x) {\n    return Math.round(x * 10) / 10;\n}\n\nfunction getViennaMinutes() {\n    const timeString = new Intl.DateTimeFormat(\"sv-SE\", {\n        timeZone: \"Europe/Vienna\",\n        hour: \"2-digit\",\n        minute: \"2-digit\",\n        hour12: false\n    }).format(new Date());\n\n    const [h, m] = timeString.split(\":\").map(Number);\n    return h * 60 + m;\n}\n\nfunction getViennaDateTimeString() {\n    return new Intl.DateTimeFormat(\"sv-SE\", {\n        timeZone: \"Europe/Vienna\",\n        year: \"numeric\",\n        month: \"2-digit\",\n        day: \"2-digit\",\n        hour: \"2-digit\",\n        minute: \"2-digit\",\n        second: \"2-digit\",\n        hour12: false\n    }).format(new Date()).replace(\" \", \"T\");\n}\n\n// ===============================\n// FLOW-WERTE EINLESEN\n// ===============================\n\nconst todayKwh = Number(flow.get(\"forecast_today_kwh\") ?? 0);\nconst tomorrowKwh = Number(flow.get(\"forecast_tomorrow_kwh\") ?? 0);\n\nconst todayDate = flow.get(\"forecast_today_date\") ?? null;\nconst tomorrowDate = flow.get(\"forecast_tomorrow_date\") ?? null;\nconst forecastSource = flow.get(\"forecast_source\") ?? \"unknown\";\nconst forecastUsedFallback = Boolean(flow.get(\"forecast_used_fallback\"));\n\nconst soc = Number(flow.get(\"soc_percent\"));\nconst houseLoadW = Number(flow.get(\"house_load_w\") ?? 0);\nconst pvPowerW = Number(flow.get(\"pv_power_w\") ?? 0);\nconst gridPowerW = Number(flow.get(\"grid_power_w\") ?? 0);\nconst batteryMode = flow.get(\"battery_mode\") ?? null;\n\n// ===============================\n// VALIDIERUNG\n// ===============================\n\nconst socValid = Number.isFinite(soc);\nconst forecastValid =\n    Number.isFinite(todayKwh) &&\n    Number.isFinite(tomorrowKwh) &&\n    !forecastUsedFallback;\n\nconst houseLoadValid = Number.isFinite(houseLoadW);\n\nconst nowMinutes = getViennaMinutes();\n\nconst inDischargeWindow =\n    nowMinutes >= DISCHARGE_START_MIN &&\n    nowMinutes < DISCHARGE_END_MIN;\n\nconst inChargeBlockWindow =\n    nowMinutes >= CHARGE_BLOCK_START_MIN &&\n    nowMinutes < CHARGE_BLOCK_END_MIN;\n\n// ===============================\n// RESERVEKLASSE AUS HEUTE + MORGEN\n// ===============================\n\n// Grundidee:\n// - Eigenverbrauch bleibt oberstes Ziel\n// - Wenn morgen schlecht ist, Akku stärker schonen\n// - Wenn heute und morgen gut sind, Direktverkauf/Ladeblockade eher erlauben\n\nlet reserveClass = \"unknown\";\nlet minSoc = 80;\nlet reserveReason = \"forecast_invalid_or_missing\";\n\nif (forecastValid) {\n    if (tomorrowKwh < 25) {\n        reserveClass = \"HIGH\";\n        minSoc = 75;\n        reserveReason = \"tomorrow_bad_keep_battery_for_self_consumption\";\n    } else if (tomorrowKwh < 35) {\n        reserveClass = \"MEDIUM_HIGH\";\n        minSoc = 50;\n        reserveReason = \"tomorrow_weak_keep_more_reserve\";\n    } else if (tomorrowKwh < 40) {\n        reserveClass = \"NORMAL\";\n        minSoc = 35;\n        reserveReason = \"tomorrow_medium_normal_reserve\";\n    } else {\n        reserveClass = \"LOW\";\n        minSoc = 15;\n        reserveReason = \"today_and_tomorrow_good_lower_reserve_ok\";\n    }\n\n    // Wenn heute schlecht ist, zusätzlich vorsichtiger sein\n    if (todayKwh < 40) {\n        minSoc = Math.max(minSoc, 65);\n        reserveClass = reserveClass === \"LOW\" ? \"NORMAL\" : reserveClass;\n        reserveReason = \"today_weak_raise_reserve\";\n    }\n}\n\n// ===============================\n// HAUSLAST IN OUTWRTE UMRECHNEN\n// ===============================\n\nlet houseLoadOutwrte = 0;\n\nif (houseLoadValid && houseLoadW > 0) {\n    houseLoadOutwrte = Math.ceil((houseLoadW / BATTERY_POWER_REF_W) * OUTWRTE_MAX) + 100;\n    houseLoadOutwrte = clamp(houseLoadOutwrte, 0, OUTWRTE_MAX);\n}\n\n// ===============================\n// BASIS-ENTLADESTRATEGIE MORGENS\n// ===============================\n\nlet baseOutwrte = 0;\nlet dischargeCase = \"none\";\n\n// Heute entscheidet primär, morgen bestimmt Reserve/Aggressivität\nif (forecastValid) {\n    if (todayKwh >= 80 && tomorrowKwh >= 60) {\n        baseOutwrte = 10000;\n        dischargeCase = \"today_very_good_tomorrow_good\";\n    } else if (todayKwh >= 80 && tomorrowKwh >= 40) {\n        baseOutwrte = 7000;\n        dischargeCase = \"today_very_good_tomorrow_medium\";\n    } else if (todayKwh >= 60 && tomorrowKwh >= 60) {\n        baseOutwrte = 5000;\n        dischargeCase = \"today_good_tomorrow_good\";\n    } else if (todayKwh >= 60 && tomorrowKwh >= 40) {\n        baseOutwrte = 3500;\n        dischargeCase = \"today_good_tomorrow_medium\";\n    } else if (todayKwh >= 40 && tomorrowKwh >= 60) {\n        baseOutwrte = 3000;\n        dischargeCase = \"today_medium_tomorrow_good\";\n    } else if (todayKwh >= 40 && tomorrowKwh >= 40) {\n        baseOutwrte = 2000;\n        dischargeCase = \"today_medium_tomorrow_medium\";\n    } else {\n        baseOutwrte = 0;\n        dischargeCase = \"forecast_not_enough_for_pre_discharge\";\n    }\n}\n\n// Finaler OutWRte berücksichtigt Eigenverbrauch\nlet finalOutwrte = 0;\nif (baseOutwrte > 0) {\n    finalOutwrte = Math.max(baseOutwrte, houseLoadOutwrte);\n    finalOutwrte = clamp(finalOutwrte, 0, OUTWRTE_MAX);\n}\n\n// ===============================\n// ENTLADE-ERLAUBNIS\n// ===============================\n\nlet dischargeAllowed = false;\nlet dischargeReason = \"not_evaluated\";\n\nif (!forecastValid) {\n    dischargeReason = \"forecast_invalid_no_discharge\";\n} else if (!socValid) {\n    dischargeReason = \"soc_missing_no_discharge\";\n} else if (!inDischargeWindow) {\n    dischargeReason = \"outside_discharge_window\";\n} else if (soc <= minSoc + SOC_MARGIN_FOR_ACTION) {\n    dischargeReason = \"soc_too_low_self_consumption_priority\";\n} else if (baseOutwrte <= 0) {\n    dischargeReason = \"forecast_not_strong_enough_for_discharge\";\n} else if (reserveClass === \"HIGH\") {\n    dischargeReason = \"reserve_high_no_discharge\";\n} else {\n    dischargeAllowed = true;\n    dischargeReason = \"inside_window_soc_ok_forecast_ok\";\n}\n\n// ===============================\n// LADEBLOCKADE BIS 10:30\n// ===============================\n\n// Ziel:\n// Bei guter Prognose und ausreichendem SOC vormittags nicht sofort laden,\n// sondern PV eher direkt ins Netz / Energiegemeinschaft schicken.\n//\n// Aber:\n// Bei niedrigem SOC oder schwachem Folgetag keine Ladeblockade.\n// Eigenverbrauch bleibt oberste Priorität.\n\nlet chargeBlockAllowed = false;\nlet chargeBlockReason = \"not_evaluated\";\n\n// Vorerst harte, konservative Logik:\nif (!forecastValid) {\n    chargeBlockReason = \"forecast_invalid_no_charge_block\";\n} else if (!socValid) {\n    chargeBlockReason = \"soc_missing_no_charge_block\";\n} else if (!inChargeBlockWindow) {\n    chargeBlockReason = \"outside_charge_block_window\";\n} else if (reserveClass === \"HIGH\") {\n    chargeBlockReason = \"reserve_high_keep_charging_allowed\";\n} else if (todayKwh < 60) {\n    chargeBlockReason = \"today_forecast_too_low_no_charge_block\";\n} else if (tomorrowKwh < 40) {\n    chargeBlockReason = \"tomorrow_too_weak_no_charge_block\";\n} else if (soc <= minSoc + CHARGE_BLOCK_MARGIN) {\n    chargeBlockReason = \"soc_too_low_no_charge_block_self_consumption_priority\";\n} else {\n    chargeBlockAllowed = true;\n    chargeBlockReason = \"good_forecast_soc_ok_direct_export_preferred_until_1030\";\n}\n\n// ===============================\n// MODBUS-VORSCHLAG, NOCH NICHT SCHREIBEN\n// ===============================\n\n// Fronius Basic Storage Control:\n// 0 = externe Steuerung aus\n// 1 = Ladelimit aktiv\n// 2 = Entladelimit aktiv\n// 3 = Lade- und Entladelimit aktiv\n\nlet storctlModProposed = 0;\nlet outwrteProposed = 0;\nlet inwrteProposed = null;\n\n// Nur Vorschlag, noch kein Write!\nif (dischargeAllowed && chargeBlockAllowed) {\n    storctlModProposed = 3;\n    outwrteProposed = finalOutwrte;\n    inwrteProposed = 0;\n} else if (dischargeAllowed) {\n    storctlModProposed = 2;\n    outwrteProposed = finalOutwrte;\n    inwrteProposed = null;\n} else if (chargeBlockAllowed) {\n    storctlModProposed = 1;\n    outwrteProposed = 0;\n    inwrteProposed = 0;\n} else {\n    storctlModProposed = 0;\n    outwrteProposed = 0;\n    inwrteProposed = null;\n}\n\n// ===============================\n// FLOW SPEICHERN FÜR SPÄTERE WRITE-NODES\n// ===============================\n\nflow.set(\"strategy_v6_reserve_class\", reserveClass);\nflow.set(\"strategy_v6_min_soc\", minSoc);\nflow.set(\"strategy_v6_discharge_allowed\", dischargeAllowed);\nflow.set(\"strategy_v6_charge_block_allowed\", chargeBlockAllowed);\nflow.set(\"strategy_v6_storctl_mod_proposed\", storctlModProposed);\nflow.set(\"strategy_v6_outwrte_proposed\", outwrteProposed);\nflow.set(\"strategy_v6_inwrte_proposed\", inwrteProposed);\n\n// Alte Namen für spätere Kompatibilität\nflow.set(\"storctl_mod\", storctlModProposed);\nflow.set(\"outwrte\", outwrteProposed);\nflow.set(\"inwrte\", inwrteProposed);\n\n// ===============================\n// DEBUG PAYLOAD\n// ===============================\n\nmsg.payload = {\n    ok: forecastValid && socValid,\n\n    mode: \"debug_only_no_modbus_write\",\n\n    time: {\n        vienna_now: getViennaDateTimeString(),\n        minutes: nowMinutes,\n        in_discharge_window: inDischargeWindow,\n        discharge_window: \"04:30-08:00\",\n        in_charge_block_window: inChargeBlockWindow,\n        charge_block_window: \"06:00-10:30\"\n    },\n\n    inputs: {\n        forecast_today_date: todayDate,\n        forecast_today_kwh: round1(todayKwh),\n        forecast_tomorrow_date: tomorrowDate,\n        forecast_tomorrow_kwh: round1(tomorrowKwh),\n        forecast_source: forecastSource,\n        forecast_used_fallback: forecastUsedFallback,\n\n        soc_percent: socValid ? round1(soc) : null,\n        house_load_w: houseLoadValid ? Math.round(houseLoadW) : null,\n        pv_power_w: Number.isFinite(pvPowerW) ? Math.round(pvPowerW) : null,\n        grid_power_w: Number.isFinite(gridPowerW) ? Math.round(gridPowerW) : null,\n        battery_mode: batteryMode\n    },\n\n    reserve: {\n        reserve_class: reserveClass,\n        min_soc: minSoc,\n        reason: reserveReason\n    },\n\n    discharge: {\n        allowed: dischargeAllowed,\n        reason: dischargeReason,\n        case: dischargeCase,\n        base_outwrte: baseOutwrte,\n        house_load_outwrte: houseLoadOutwrte,\n        final_outwrte: finalOutwrte\n    },\n\n    charge_block: {\n        allowed: chargeBlockAllowed,\n        reason: chargeBlockReason,\n        inwrte: chargeBlockAllowed ? 0 : null,\n        until: \"10:30\"\n    },\n\n    modbus_proposal: {\n        write_active: false,\n        storctl_mod: storctlModProposed,\n        outwrte: outwrteProposed,\n        inwrte: inwrteProposed,\n        note: \"Nur Vorschlag. Noch nicht mit Modbus Write verbinden.\"\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 400,
+        "wires": [
+            [
+                "ecdcb465f6afbd11"
+            ]
+        ]
+    },
+    {
+        "id": "3c26c143373a7f5c",
+        "type": "inject",
+        "z": "6301e7be3ca6daa7",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 100,
+        "y": 400,
+        "wires": [
+            [
+                "b095a4c7d3d9ff0b"
+            ]
+        ]
     }
 ]
