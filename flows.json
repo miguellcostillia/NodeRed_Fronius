@@ -28,10 +28,89 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 220,
-        "y": 120,
+        "x": 120,
+        "y": 60,
         "wires": [
-            []
+            [
+                "fd347b5e56e72cd2"
+            ]
         ]
+    },
+    {
+        "id": "1c045d39bc3d7f49",
+        "type": "function",
+        "z": "6301e7be3ca6daa7",
+        "name": "Verto_auslesen",
+        "func": "// ======================================================\n// NODE: Fronius Werte auswerten\n// Zweck:\n// - Fronius PowerFlow API auswerten\n// - SOC, Hauslast, PV-Leistung und Batterie-Leistung lesen\n// - Werte zusätzlich im flow-Speicher ablegen\n// - Keine node.warn Ausgaben: Debug nur über Debug-Node\n// ======================================================\n\nconst data = msg.payload?.Body?.Data;\nconst site = data?.Site || {};\nconst inverters = data?.Inverters || {};\n\n// Ersten Inverter suchen\nconst firstInvKey = Object.keys(inverters)[0];\nconst inv = firstInvKey ? inverters[firstInvKey] : {};\n\n// Rohwerte aus Fronius API\nconst soc = Number(inv.SOC);\nconst batteryMode = inv.Battery_Mode ?? null;\n\nconst pPv = Number(site.P_PV ?? 0);\nconst pLoadRaw = Number(site.P_Load ?? 0);\nconst pGrid = Number(site.P_Grid ?? 0);\nconst pAkkuRaw = Number(site.P_Akku ?? 0);\n\n// Fronius P_Load ist häufig negativ für Verbrauch.\n// Für unsere Logik wollen wir Hausverbrauch positiv in W.\nconst houseLoadW = Math.abs(pLoadRaw);\n\n// V5/Victron-Anzeige-Konvention aus unserer PDF:\n// Laden positiv, Entladen negativ.\n// Fronius P_Akku muss ggf. später geprüft werden.\n// Aktuell übernehmen wir den Rohwert separat und berechnen Anzeige konservativ.\nconst batteryPowerRawW = pAkkuRaw;\nconst batteryPowerDisplayW = pAkkuRaw;\n\n// Validierung\nconst socValid = Number.isFinite(soc);\nconst houseLoadValid = Number.isFinite(houseLoadW);\n\n// In flow-Speicher schreiben\nif (socValid) {\n    flow.set(\"soc_percent\", soc);\n}\n\nif (houseLoadValid) {\n    flow.set(\"house_load_w\", houseLoadW);\n}\n\nflow.set(\"pv_power_w\", Number.isFinite(pPv) ? pPv : 0);\nflow.set(\"grid_power_w\", Number.isFinite(pGrid) ? pGrid : 0);\nflow.set(\"battery_power_raw_w\", Number.isFinite(batteryPowerRawW) ? batteryPowerRawW : 0);\nflow.set(\"battery_mode\", batteryMode);\n\n// Debug-/Status-Payload\nmsg.payload = {\n    ok: socValid && houseLoadValid,\n    source: \"fronius_powerflow\",\n    soc_percent: socValid ? soc : null,\n    battery_mode: batteryMode,\n    house_load_w: houseLoadValid ? houseLoadW : null,\n    pv_power_w: Number.isFinite(pPv) ? pPv : null,\n    grid_power_w: Number.isFinite(pGrid) ? pGrid : null,\n    battery_power_raw_w: Number.isFinite(batteryPowerRawW) ? batteryPowerRawW : null,\n    battery_power_display_w: Number.isFinite(batteryPowerDisplayW) ? batteryPowerDisplayW : null,\n    raw: {\n        P_Load: pLoadRaw,\n        P_Grid: pGrid,\n        P_Akku: pAkkuRaw,\n        P_PV: pPv\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 60,
+        "wires": [
+            [
+                "f773bfc7eed15a41"
+            ]
+        ]
+    },
+    {
+        "id": "fd347b5e56e72cd2",
+        "type": "http request",
+        "z": "6301e7be3ca6daa7",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://10.0.0.216/solar_api/v1/GetPowerFlowRealtimeData.fcgi",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 290,
+        "y": 60,
+        "wires": [
+            [
+                "234afdb4a07c3035"
+            ]
+        ]
+    },
+    {
+        "id": "234afdb4a07c3035",
+        "type": "json",
+        "z": "6301e7be3ca6daa7",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 470,
+        "y": 60,
+        "wires": [
+            [
+                "1c045d39bc3d7f49"
+            ]
+        ]
+    },
+    {
+        "id": "f773bfc7eed15a41",
+        "type": "debug",
+        "z": "6301e7be3ca6daa7",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 840,
+        "y": 60,
+        "wires": []
     }
 ]
