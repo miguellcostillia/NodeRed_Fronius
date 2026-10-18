@@ -685,8 +685,8 @@
         "id": "6db2bf493a5dc1c6",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Entlade Sperren Sammeln",
-        "func": "// ======================================================\n// NODE: GUI Befehl auswerten\n// Zweck:\n// - Button aus Dashboard auswerten\n// - Manuelle Entladesperre speichern\n// - Nachricht an Entladesperren-Sammler schicken\n// ======================================================\n\nconst p = msg.payload || {};\nconst cmd = p.cmd;\n\nif (cmd === \"set_discharge_lock\") {\n    const active = !!p.value;\n\n    flow.set(\"manual_discharge_lock\", active);\n\n    node.status({\n        fill: active ? \"red\" : \"green\",\n        shape: \"dot\",\n        text: active ? \"GUI Sperre aktiv\" : \"GUI Sperre aus\"\n    });\n\n    return {\n        topic: \"entladesperre_manual\",\n        payload: {\n            source: \"gui_manual\",\n            active,\n            reason: active\n                ? \"Entladen manuell über Web-GUI gesperrt\"\n                : \"Manuelle Web-GUI-Sperre aufgehoben\",\n            ts: new Date().toISOString()\n        }\n    };\n}\n\nif (cmd === \"save_params\") {\n    const old = flow.get(\"verto_strategy_params\") || {};\n    const incoming = p.params || {};\n\n    const next = { ...old };\n\n    for (const [key, value] of Object.entries(incoming)) {\n        const n = Number(value);\n        if (Number.isFinite(n)) {\n            next[key] = n;\n        }\n    }\n\n    flow.set(\"verto_strategy_params\", next);\n\n    node.status({\n        fill: \"blue\",\n        shape: \"dot\",\n        text: \"Parameter gespeichert\"\n    });\n\n    return null;\n}\n\nreturn null;",
+        "name": "GUI Befehl auswerten",
+        "func": "// ======================================================\n// NODE: GUI Befehl auswerten\n// Zweck:\n// - Button aus Dashboard auswerten\n// - Manuelle Entladesperre speichern\n// - Nachricht an Entladesperren-Sammler schicken\n// ======================================================\n\nconst p = msg.payload || {};\nconst cmd = p.cmd;\n\nif (cmd === \"set_discharge_lock\") {\n    const active = !!p.value;\n\n    // Nur noch zur Anzeige/Kompatibilität – die Steuerung\n    // läuft über den Entladesperren-Sammler.\n    flow.set(\"manual_discharge_lock\", active);\n\n    node.status({\n        fill: active ? \"red\" : \"green\",\n        shape: \"dot\",\n        text: active ? \"GUI Sperre aktiv\" : \"GUI Sperre aus\"\n    });\n\n    // Format des Entladesperren-Sammlers\n    // (gleich wie beim Shelly / Heubelüftung)\n    return {\n        topic: \"entladen_sperre\",\n        lock_source: \"gui_manual\",\n        entladen_sperren: active,\n        payload: {\n            source: \"gui_manual\",\n            entladen_sperren: active,\n            reason: active\n                ? \"Entladen manuell über Web-GUI gesperrt\"\n                : \"Manuelle Web-GUI-Sperre aufgehoben\",\n            ts: new Date().toISOString()\n        }\n    };\n}\n\nif (cmd === \"save_params\") {\n    const old = flow.get(\"verto_strategy_params\") || {};\n    const incoming = p.params || {};\n\n    const next = { ...old };\n\n    for (const [key, value] of Object.entries(incoming)) {\n        const n = Number(value);\n        if (Number.isFinite(n)) {\n            next[key] = n;\n        }\n    }\n\n    flow.set(\"verto_strategy_params\", next);\n\n    node.status({\n        fill: \"blue\",\n        shape: \"dot\",\n        text: \"Parameter gespeichert\"\n    });\n\n    return null;\n}\n\nreturn null;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -696,7 +696,9 @@
         "x": 900,
         "y": 360,
         "wires": [
-            []
+            [
+                "b68362bf68f6153e"
+            ]
         ]
     },
     {
