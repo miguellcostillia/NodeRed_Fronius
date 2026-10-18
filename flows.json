@@ -2,17 +2,43 @@
     {
         "id": "6301e7be3ca6daa7",
         "type": "tab",
-        "label": "Wechselrichter Steuerung ",
+        "label": "Wechselrichter Steuerung",
         "disabled": false,
-        "info": "",
-        "env": []
+        "info": "# Wechselrichter Steuerung (Verto Plus + BYD)\n\n## Einstellungen\nDoppelklick auf den Tab → **Umgebungsvariablen**:\n\n| Variable | Bedeutung |\n|---|---|\n| `VERTO_IP` | IP des Fronius Verto (Solar API) |\n| `SHELLY_IP` | IP des Shelly der Heubelüftung |\n| `PV_NEIGUNG`, `PV_AZIMUT`, `PV_KWP` | PV-Anlage für forecast.solar |\n\n- **Modbus-IP** des Verto: im Konfigurations-Node *Verto Modbus* (Doppelklick auf *Write Verto*, Stift neben dem Server). Muss zu `VERTO_IP` passen.\n- **Standort** (Prognose + Sonnenaufgang) und alle Strategie-Werte: im Dashboard, Tab *Strategie*.\n- **Wattpilot**: eigener Tab, Doppelklick auf den Node *Wattpilot Flex*.\n\n## Bereiche\n1. Live-Daten Verto – alle 5 s Powerflow lesen\n2. PV-Prognose – 2:00 und 4:00 Uhr\n3. Entladesperren – Heubelüftung (jede Minute) + Dashboard\n4. Strategie – Strategie V7.4 + Konfiguration\n5. Modbus – Sollwerte schreiben, Readback alle 20 s\n6. Batterie BYD – BMS-Daten alle 10 s\n7. Dashboard – Status bauen, GUI, Befehle\n\nQuerverbindungen zwischen Bereichen laufen über Link-Nodes (Pfeile), Doppelklick zeigt das Ziel.\n",
+        "env": [
+            {
+                "name": "VERTO_IP",
+                "value": "10.0.0.216",
+                "type": "str"
+            },
+            {
+                "name": "SHELLY_IP",
+                "value": "10.0.0.105",
+                "type": "str"
+            },
+            {
+                "name": "PV_NEIGUNG",
+                "value": "30",
+                "type": "num"
+            },
+            {
+                "name": "PV_AZIMUT",
+                "value": "-30",
+                "type": "num"
+            },
+            {
+                "name": "PV_KWP",
+                "value": "17",
+                "type": "num"
+            }
+        ]
     },
     {
         "id": "e7418f17a21aa1b7",
         "type": "tab",
         "label": "Wattpilot",
         "disabled": false,
-        "info": "",
+        "info": "# Wattpilot\nEinstellungen (IP, Passwort, Update-Intervall): Doppelklick auf den Node **Wattpilot Flex**.\nDaten gehen per Link ins Dashboard (Tab *Wattpilot*), Befehle aus dem Dashboard kommen über *Wattpilot Befehl* herein.\nAufbereitete Werte für andere Flows: global `wattpilot`.\n",
         "env": []
     },
     {
@@ -164,9 +190,239 @@
         ]
     },
     {
+        "id": "d7616d62d4932c6b",
+        "type": "group",
+        "z": "6301e7be3ca6daa7",
+        "name": "1 · Live-Daten Verto (alle 5 s)",
+        "style": {
+            "fill": "#3f93cf",
+            "fill-opacity": "0.18",
+            "stroke": "#3f93cf",
+            "label": true,
+            "color": "#3a3a3a"
+        },
+        "nodes": [
+            "73f0cb4e61668d0e",
+            "408dfc86275a90b4",
+            "fd347b5e56e72cd2",
+            "234afdb4a07c3035",
+            "1c045d39bc3d7f49",
+            "06b5b11380be17f1",
+            "c553677291d76173",
+            "dde43884657190d3"
+        ],
+        "x": 115,
+        "y": 25,
+        "w": 1440,
+        "h": 165
+    },
+    {
+        "id": "1dcc23f7b69e8173",
+        "type": "group",
+        "z": "6301e7be3ca6daa7",
+        "name": "2 · PV-Prognose (02:00 / 04:00)",
+        "style": {
+            "fill": "#ffbf00",
+            "fill-opacity": "0.18",
+            "stroke": "#ffbf00",
+            "label": true,
+            "color": "#3a3a3a"
+        },
+        "nodes": [
+            "39a1173ec91818b4",
+            "358ed3b6ef546205",
+            "27537240031a7b38",
+            "d2cd407777295942",
+            "d6ad4b2eae628ddc",
+            "775809b8e60b2849",
+            "b5cc57d73a6e1755"
+        ],
+        "x": 115,
+        "y": 215,
+        "w": 1255,
+        "h": 155
+    },
+    {
+        "id": "559a0358e0d982d7",
+        "type": "group",
+        "z": "6301e7be3ca6daa7",
+        "name": "3 · Entladesperren (Heubelüftung jede Minute + Dashboard)",
+        "style": {
+            "fill": "#ff7f7f",
+            "fill-opacity": "0.18",
+            "stroke": "#ff7f7f",
+            "label": true,
+            "color": "#3a3a3a"
+        },
+        "nodes": [
+            "90832d0e311854f8",
+            "984251d398278eb0",
+            "2a8d588540a1878d",
+            "c8358783a0ed753a",
+            "3164304fbaee5495",
+            "b68362bf68f6153e",
+            "11967f8ab2d05525"
+        ],
+        "x": 115,
+        "y": 395,
+        "w": 1255,
+        "h": 160
+    },
+    {
+        "id": "b886f3f9b6614672",
+        "type": "group",
+        "z": "6301e7be3ca6daa7",
+        "name": "4 · Strategie V7.4 + Konfiguration",
+        "style": {
+            "fill": "#6f2fa0",
+            "fill-opacity": "0.18",
+            "stroke": "#6f2fa0",
+            "label": true,
+            "color": "#3a3a3a"
+        },
+        "nodes": [
+            "98f5acd283645688",
+            "b095a4c7d3d9ff0b",
+            "377ef37c09a350ee",
+            "b6eea9f57c997369",
+            "4c16a54dc634cc11",
+            "9d55c440bd781e4c",
+            "f6fb9940122a126c",
+            "08b89f7479d7891c"
+        ],
+        "x": 115,
+        "y": 580,
+        "w": 820,
+        "h": 210
+    },
+    {
+        "id": "18314bc9cc35f1d1",
+        "type": "group",
+        "z": "6301e7be3ca6daa7",
+        "name": "5 · Modbus Verto (Sollwerte + Readback alle 20 s)",
+        "style": {
+            "fill": "#a4a4a4",
+            "fill-opacity": "0.18",
+            "stroke": "#a4a4a4",
+            "label": true,
+            "color": "#3a3a3a"
+        },
+        "nodes": [
+            "22b33fe25cf29314",
+            "8a23fb970444f86c",
+            "6a4f9692f8ab6f8b",
+            "f274361449082e27",
+            "ee052407ba2b7968",
+            "dd906061c91cefab",
+            "5d8719fff1ac5474"
+        ],
+        "x": 115,
+        "y": 815,
+        "w": 825,
+        "h": 175
+    },
+    {
+        "id": "715d3c3666cc1166",
+        "type": "group",
+        "z": "6301e7be3ca6daa7",
+        "name": "6 · Batterie BYD (alle 10 s)",
+        "style": {
+            "fill": "#62b56b",
+            "fill-opacity": "0.18",
+            "stroke": "#62b56b",
+            "label": true,
+            "color": "#3a3a3a"
+        },
+        "nodes": [
+            "ccf4d68ccfa53acf",
+            "9ad4c2d2577b4999",
+            "f50608b3258ba4b4",
+            "f48d8d4c87e91023",
+            "98123f1be734b60b",
+            "59bfb67a0b78f6d9"
+        ],
+        "x": 115,
+        "y": 1015,
+        "w": 1215,
+        "h": 105
+    },
+    {
+        "id": "19391d7d50fb664c",
+        "type": "group",
+        "z": "6301e7be3ca6daa7",
+        "name": "7 · Dashboard",
+        "style": {
+            "fill": "#00a2b5",
+            "fill-opacity": "0.18",
+            "stroke": "#00a2b5",
+            "label": true,
+            "color": "#3a3a3a"
+        },
+        "nodes": [
+            "105e3f9a886729a0",
+            "749ddfd6017af057",
+            "135dceee5a6e573e",
+            "6db2bf493a5dc1c6",
+            "4d9a58dd1f29cdd5",
+            "ee2c0ac396147831",
+            "c6aa4c3b4f3194e1",
+            "ebe99c241579c6a1",
+            "0fcd153721565e25"
+        ],
+        "x": 115,
+        "y": 1145,
+        "w": 1110,
+        "h": 205
+    },
+    {
+        "id": "7505fb73bffd0cce",
+        "type": "group",
+        "z": "e7418f17a21aa1b7",
+        "name": "Wattpilot Flex (Websocket)",
+        "style": {
+            "fill": "#e2d96e",
+            "fill-opacity": "0.25",
+            "stroke": "#c8b800",
+            "label": true,
+            "color": "#3a3a3a"
+        },
+        "nodes": [
+            "569cf436e87280c0",
+            "ca9a37eb6c38d1d5",
+            "9985640af8507b79",
+            "f2bdad5c08e68bb6",
+            "9421770002ef5c60",
+            "b45d94273525e4d6"
+        ],
+        "x": 120,
+        "y": 40,
+        "w": 720,
+        "h": 210
+    },
+    {
+        "id": "6a5be7948e18826e",
+        "type": "group",
+        "z": "e7418f17a21aa1b7",
+        "name": "OCPP-Server (noch ohne Logik)",
+        "style": {
+            "fill": "#bfbfbf",
+            "fill-opacity": "0.2",
+            "stroke": "#a4a4a4",
+            "label": true,
+            "color": "#3a3a3a"
+        },
+        "nodes": [
+            "51cac8297ae2844f"
+        ],
+        "x": 120,
+        "y": 280,
+        "w": 240,
+        "h": 90
+    },
+    {
         "id": "0f699b7c4fe5a61b",
         "type": "modbus-client",
-        "name": "Fronius ",
+        "name": "Verto Modbus",
         "clienttype": "tcp",
         "bufferCommands": true,
         "stateLogEnabled": false,
@@ -286,7 +542,7 @@
         "id": "b5cc57d73a6e1755",
         "type": "inject",
         "z": "6301e7be3ca6daa7",
-        "name": "Inject 2:00h ",
+        "name": "02:00",
         "props": [
             {
                 "p": "payload"
@@ -303,20 +559,20 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 110,
-        "y": 80,
+        "x": 220,
+        "y": 320,
         "wires": [
             [
-                "27537240031a7b38",
-                "2a8d588540a1878d"
+                "358ed3b6ef546205"
             ]
-        ]
+        ],
+        "g": "1dcc23f7b69e8173"
     },
     {
         "id": "1c045d39bc3d7f49",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Verto_auslesen",
+        "name": "Powerflow → Flow-Werte",
         "func": "// ======================================================\n// NODE: Fronius Werte auswerten\n// Zweck:\n// - Fronius PowerFlow API auswerten\n// - SOC, Hauslast, PV-Leistung und Batterie-Leistung lesen\n// - Werte zusätzlich im flow-Speicher ablegen\n// - Keine node.warn Ausgaben: Debug nur über Debug-Node\n// ======================================================\n\nconst data = msg.payload?.Body?.Data;\nconst site = data?.Site || {};\nconst inverters = data?.Inverters || {};\n\n// Ersten Inverter suchen\nconst firstInvKey = Object.keys(inverters)[0];\nconst inv = firstInvKey ? inverters[firstInvKey] : {};\n\n// Rohwerte aus Fronius API\nconst soc = Number(inv.SOC);\nconst batteryMode = inv.Battery_Mode ?? null;\n\nconst pPv = Number(site.P_PV ?? 0);\nconst pLoadRaw = Number(site.P_Load ?? 0);\nconst pGrid = Number(site.P_Grid ?? 0);\nconst pAkkuRaw = Number(site.P_Akku ?? 0);\n\n// Fronius P_Load ist häufig negativ für Verbrauch.\n// Für unsere Logik wollen wir Hausverbrauch positiv in W.\nconst houseLoadW = Math.abs(pLoadRaw);\n\n// V5/Victron-Anzeige-Konvention aus unserer PDF:\n// Laden positiv, Entladen negativ.\n// Fronius P_Akku muss ggf. später geprüft werden.\n// Aktuell übernehmen wir den Rohwert separat und berechnen Anzeige konservativ.\nconst batteryPowerRawW = pAkkuRaw;\nconst batteryPowerDisplayW = pAkkuRaw;\n\n// Validierung\nconst socValid = Number.isFinite(soc);\nconst houseLoadValid = Number.isFinite(houseLoadW);\n\n// In flow-Speicher schreiben\nif (socValid) {\n    flow.set(\"soc_percent\", soc);\n}\n\nif (houseLoadValid) {\n    flow.set(\"house_load_w\", houseLoadW);\n}\n\nflow.set(\"pv_power_w\", Number.isFinite(pPv) ? pPv : 0);\nflow.set(\"grid_power_w\", Number.isFinite(pGrid) ? pGrid : 0);\nflow.set(\"battery_power_raw_w\", Number.isFinite(batteryPowerRawW) ? batteryPowerRawW : 0);\nflow.set(\"battery_mode\", batteryMode);\n\n// Debug-/Status-Payload\nmsg.payload = {\n    ok: socValid && houseLoadValid,\n    source: \"fronius_powerflow\",\n    soc_percent: socValid ? soc : null,\n    battery_mode: batteryMode,\n    house_load_w: houseLoadValid ? houseLoadW : null,\n    pv_power_w: Number.isFinite(pPv) ? pPv : null,\n    grid_power_w: Number.isFinite(pGrid) ? pGrid : null,\n    battery_power_raw_w: Number.isFinite(batteryPowerRawW) ? batteryPowerRawW : null,\n    battery_power_display_w: Number.isFinite(batteryPowerDisplayW) ? batteryPowerDisplayW : null,\n    raw: {\n        P_Load: pLoadRaw,\n        P_Grid: pGrid,\n        P_Akku: pAkkuRaw,\n        P_PV: pPv\n    }\n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
@@ -324,23 +580,24 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 640,
-        "y": 240,
+        "x": 990,
+        "y": 80,
         "wires": [
             [
                 "06b5b11380be17f1"
             ]
-        ]
+        ],
+        "g": "d7616d62d4932c6b"
     },
     {
         "id": "fd347b5e56e72cd2",
         "type": "http request",
         "z": "6301e7be3ca6daa7",
-        "name": "",
+        "name": "Verto Powerflow",
         "method": "GET",
         "ret": "txt",
         "paytoqs": "ignore",
-        "url": "http://10.0.0.216/solar_api/v1/GetPowerFlowRealtimeData.fcgi",
+        "url": "",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -348,35 +605,37 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 290,
-        "y": 240,
+        "x": 600,
+        "y": 80,
         "wires": [
             [
                 "234afdb4a07c3035"
             ]
-        ]
+        ],
+        "g": "d7616d62d4932c6b"
     },
     {
         "id": "234afdb4a07c3035",
         "type": "json",
         "z": "6301e7be3ca6daa7",
-        "name": "",
+        "name": "JSON",
         "property": "payload",
         "action": "",
         "pretty": false,
-        "x": 470,
-        "y": 240,
+        "x": 785,
+        "y": 80,
         "wires": [
             [
                 "1c045d39bc3d7f49"
             ]
-        ]
+        ],
+        "g": "d7616d62d4932c6b"
     },
     {
         "id": "06b5b11380be17f1",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Daten_auswerten",
+        "name": "Powerflow auswerten",
         "func": "// ======================================================\n// NODE: Verto_HTTP_auswerten\n// Zweck:\n// - Fronius PowerFlowRealtimeData auswerten\n// - P_Grid, P_Load, P_PV, P_Akku und SOC robust extrahieren\n// - Werte im flow context speichern\n// - KEINE Regelentscheidung hier\n// ======================================================\n\nconst DEBUG = true;\n\n// ------------------------------------------------------\n// Hilfsfunktionen\n// ------------------------------------------------------\nfunction asNumber(v) {\n    if (v === null || v === undefined) return null;\n    const n = Number(v);\n    return Number.isFinite(n) ? n : null;\n}\n\nfunction pickNumber(...values) {\n    for (const v of values) {\n        const n = asNumber(v);\n        if (n !== null) return n;\n    }\n    return null;\n}\n\n// ------------------------------------------------------\n// Fronius PowerFlow Struktur\n// ------------------------------------------------------\nconst data = msg.payload?.Body?.Data || {};\nconst site = data.Site || {};\nconst inverters = data.Inverters || {};\n\n// Meist gibt es nur Inverter \"1\"\nconst inv1 =\n    inverters[\"1\"] ||\n    inverters[1] ||\n    Object.values(inverters)[0] ||\n    {};\n\n// ------------------------------------------------------\n// Werte lesen\n// ------------------------------------------------------\n\n// P_Grid:\n// typischerweise:\n//   > 0 = Netzbezug\n//   < 0 = Einspeisung\nconst gridPowerW = pickNumber(\n    site.P_Grid,\n    msg.grid_power_w,\n    msg.payload?.grid_power_w\n);\n\n// P_Load:\n// bei Fronius oft negativ, wir speichern Hausverbrauch positiv\nconst pLoadRaw = pickNumber(\n    site.P_Load,\n    msg.house_load_w,\n    msg.payload?.house_load_w\n);\n\nconst houseLoadW = pLoadRaw !== null ? Math.abs(pLoadRaw) : null;\n\nconst pvPowerW = pickNumber(\n    site.P_PV,\n    msg.pv_power_w,\n    msg.payload?.pv_power_w\n);\n\n// P_Akku / P_Battery:\n// Vorzeichen kann je nach Fronius-Ansicht unterschiedlich sein.\n// Wir speichern erstmal roh und ändern NICHTS blind.\nconst batteryPowerRawW = pickNumber(\n    site.P_Akku,\n    site.P_Battery,\n    msg.battery_power_raw_w,\n    msg.payload?.battery_power_raw_w\n);\n\n// SOC kann je nach Endpoint im Inverter-Block oder Site liegen\nconst socPercent = pickNumber(\n    inv1.SOC,\n    site.SOC,\n    msg.soc_percent,\n    msg.payload?.soc_percent\n);\n\n// Battery Mode, falls vorhanden\nconst batteryMode =\n    inv1.Battery_Mode ||\n    inv1.battery_mode ||\n    site.Battery_Mode ||\n    msg.battery_mode ||\n    msg.payload?.battery_mode ||\n    null;\n\n// ------------------------------------------------------\n// Plausibilitätscheck\n// ------------------------------------------------------\nif (gridPowerW === null) {\n    node.error(\"P_Grid / grid_power_w nicht gefunden\", msg);\n    return null;\n}\n\nif (houseLoadW === null) {\n    node.warn(\"P_Load / house_load_w nicht gefunden, Regelung kann später nur mit P_Grid arbeiten\");\n}\n\n// ------------------------------------------------------\n// flow context speichern\n// ------------------------------------------------------\nflow.set(\"fronius_grid_power_w\", gridPowerW);\nflow.set(\"fronius_house_load_w\", houseLoadW);\nflow.set(\"fronius_pv_power_w\", pvPowerW);\nflow.set(\"fronius_battery_power_raw_w\", batteryPowerRawW);\nflow.set(\"fronius_soc_percent\", socPercent);\nflow.set(\"fronius_battery_mode\", batteryMode);\nflow.set(\"fronius_http_last_seen\", Date.now());\n\n// Für spätere Functions auch auf msg schreiben\nmsg.ok = true;\nmsg.source = \"fronius_powerflow\";\n\nmsg.grid_power_w = gridPowerW;\nmsg.house_load_w = houseLoadW;\nmsg.pv_power_w = pvPowerW;\nmsg.battery_power_raw_w = batteryPowerRawW;\nmsg.soc_percent = socPercent;\nmsg.battery_mode = batteryMode;\n\nif (DEBUG) {\n    msg.debug_fronius = {\n        grid_power_w: gridPowerW,\n        grid_meaning:\n            gridPowerW > 0 ? \"Netzbezug\" :\n            gridPowerW < 0 ? \"Einspeisung\" :\n            \"Null\",\n        house_load_w: houseLoadW,\n        pv_power_w: pvPowerW,\n        battery_power_raw_w: batteryPowerRawW,\n        soc_percent: socPercent,\n        battery_mode: batteryMode,\n        last_seen: new Date().toISOString()\n    };\n}\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
@@ -384,24 +643,25 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 850,
-        "y": 240,
+        "x": 1245,
+        "y": 80,
         "wires": [
             [
-                "b095a4c7d3d9ff0b",
+                "c553677291d76173",
                 "dde43884657190d3"
             ]
-        ]
+        ],
+        "g": "d7616d62d4932c6b"
     },
     {
         "id": "27537240031a7b38",
         "type": "http request",
         "z": "6301e7be3ca6daa7",
-        "name": "",
+        "name": "forecast.solar",
         "method": "GET",
         "ret": "txt",
         "paytoqs": "ignore",
-        "url": "https://api.forecast.solar/estimate/48.30/14.29/30/-30/17",
+        "url": "",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -409,19 +669,20 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 290,
-        "y": 60,
+        "x": 630,
+        "y": 270,
         "wires": [
             [
                 "d2cd407777295942"
             ]
-        ]
+        ],
+        "g": "1dcc23f7b69e8173"
     },
     {
         "id": "d6ad4b2eae628ddc",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Forcast_V6",
+        "name": "Prognose auswerten V6",
         "func": "// ======================================================\n// NODE: Forecast_auswerten_V6\n// Zweck:\n// - forecast.solar Response auswerten\n// - result.watt_hours_period pro Europe/Vienna-Kalendertag summieren\n// - heute, morgen, übermorgen in kWh berechnen\n// - Werte im flow-Speicher ablegen\n// - V6: noch keine finale Steuerentscheidung, nur Forecast-Daten\n// ======================================================\n\nfunction viennaDateString(offsetDays = 0) {\n    const fmt = new Intl.DateTimeFormat(\"sv-SE\", {\n        timeZone: \"Europe/Vienna\",\n        year: \"numeric\",\n        month: \"2-digit\",\n        day: \"2-digit\"\n    });\n\n    const now = new Date();\n    const todayStr = fmt.format(now);\n\n    // Mittagszeit verhindert DST-/Zeitzonen-Kantenprobleme\n    const base = new Date(`${todayStr}T12:00:00`);\n    base.setDate(base.getDate() + offsetDays);\n\n    return fmt.format(base);\n}\n\nfunction round1(x) {\n    return Math.round(x * 10) / 10;\n}\n\nfunction sumWhForDate(wattHoursPeriod, dateStr) {\n    let sumWh = 0;\n    let points = 0;\n\n    for (const [ts, whRaw] of Object.entries(wattHoursPeriod || {})) {\n        if (!ts.startsWith(dateStr)) continue;\n\n        const wh = Number(whRaw);\n        if (!Number.isFinite(wh)) continue;\n\n        sumWh += wh;\n        points++;\n    }\n\n    return {\n        kwh: round1(sumWh / 1000),\n        points\n    };\n}\n\n// Payload robust behandeln\nlet payload = msg.payload;\n\nif (typeof payload === \"string\") {\n    try {\n        payload = JSON.parse(payload);\n    } catch (e) {\n        payload = {};\n    }\n}\n\nconst whPeriod = payload?.result?.watt_hours_period;\n\nconst todayDate = viennaDateString(0);\nconst tomorrowDate = viennaDateString(1);\nconst dayAfterTomorrowDate = viennaDateString(2);\n\nlet source = \"forecast.solar/watt_hours_period\";\nlet usedFallback = false;\n\nlet today = { kwh: 0, points: 0 };\nlet tomorrow = { kwh: 0, points: 0 };\nlet dayAfterTomorrow = { kwh: 0, points: 0 };\n\nif (whPeriod && typeof whPeriod === \"object\") {\n    today = sumWhForDate(whPeriod, todayDate);\n    tomorrow = sumWhForDate(whPeriod, tomorrowDate);\n    dayAfterTomorrow = sumWhForDate(whPeriod, dayAfterTomorrowDate);\n\n    if (today.points + tomorrow.points + dayAfterTomorrow.points === 0) {\n        usedFallback = true;\n        source = \"fallback_no_matching_dates\";\n    }\n} else {\n    usedFallback = true;\n    source = \"fallback_missing_watt_hours_period\";\n}\n\n// Flow-Speicher für Strategie_V6\nflow.set(\"forecast_today_kwh\", today.kwh);\nflow.set(\"forecast_tomorrow_kwh\", tomorrow.kwh);\nflow.set(\"forecast_day_after_tomorrow_kwh\", dayAfterTomorrow.kwh);\n\nflow.set(\"forecast_today_date\", todayDate);\nflow.set(\"forecast_tomorrow_date\", tomorrowDate);\nflow.set(\"forecast_day_after_tomorrow_date\", dayAfterTomorrowDate);\n\nflow.set(\"forecast_source\", source);\nflow.set(\"forecast_used_fallback\", usedFallback);\nflow.set(\"forecast_updated_at\", new Date().toISOString());\n\n// Abwärtskompatibel für alte Nodes\nflow.set(\"forecast_kwh\", today.kwh);\nflow.set(\"forecast_date\", todayDate);\n\n// Debug-Ausgabe\nmsg.payload = {\n    ok: !usedFallback,\n    source,\n    used_fallback: usedFallback,\n    forecast: {\n        today: {\n            date: todayDate,\n            kwh: today.kwh,\n            points: today.points\n        },\n        tomorrow: {\n            date: tomorrowDate,\n            kwh: tomorrow.kwh,\n            points: tomorrow.points\n        },\n        day_after_tomorrow: {\n            date: dayAfterTomorrowDate,\n            kwh: dayAfterTomorrow.kwh,\n            points: dayAfterTomorrow.points\n        }\n    }\n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
@@ -429,35 +690,37 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 570,
-        "y": 60,
+        "x": 1010,
+        "y": 270,
         "wires": [
             [
                 "775809b8e60b2849"
             ]
-        ]
+        ],
+        "g": "1dcc23f7b69e8173"
     },
     {
         "id": "d2cd407777295942",
         "type": "json",
         "z": "6301e7be3ca6daa7",
-        "name": "",
+        "name": "JSON",
         "property": "payload",
         "action": "",
         "pretty": false,
-        "x": 430,
-        "y": 60,
+        "x": 805,
+        "y": 270,
         "wires": [
             [
                 "d6ad4b2eae628ddc"
             ]
-        ]
+        ],
+        "g": "1dcc23f7b69e8173"
     },
     {
         "id": "b095a4c7d3d9ff0b",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Strategie_V7",
+        "name": "Strategie V7.4",
         "func": "// ======================================================\n// NODE: Strategie_V7.4\n//\n// Bereinigte Strategie:\n// - Ziel-SOC aus HEUTE + MORGEN, schlechtere Klasse gewinnt\n// - strategische Entladung relativ zum Sonnenaufgang\n// - keine SOC-Toleranz: exakt am Ziel-SOC stoppen\n// - Ladeblock ab Sonnenaufgang\n// - Ladeblock ab Ziel-SOC; unter Ziel darf bis Ziel geladen werden\n// - Ladebegrenzung nur nach Forecast HEUTE\n// - normale Hauslast regelt Fronius selbst\n// - Hauslast dient nur als Mindest-Floor bei Zwangsentladung\n// - externe Entladesperre gibt den Verto vollständig frei\n// ======================================================\n\nconst CONFIG_KEY = \"strategy_v7_config\";\nconst WRTE_MAX = 10000;\n\n// Sicherheits-Fallback nur falls Sonnenaufgang nicht berechnet werden kann.\n// Standort ist normalerweise immer aus der Config vorhanden.\nconst FALLBACK_DISCHARGE_START_MIN = 4 * 60 + 30; // 04:30\nconst FALLBACK_DISCHARGE_END_MIN   = 8 * 60;      // 08:00\n\n// ------------------------------------------------------\n// Hilfsfunktionen\n// ------------------------------------------------------\n\nconst clamp = (v, min, max) =>\n    Math.min(Math.max(Number(v), min), max);\n\nconst round0 = v => Math.round(Number(v) || 0);\nconst round1 = v => Math.round((Number(v) || 0) * 10) / 10;\n\nfunction finite(value) {\n    if (value === null || value === undefined || value === \"\") return null;\n    const n = Number(value);\n    return Number.isFinite(n) ? n : null;\n}\n\nfunction normMin(value) {\n    return ((Math.round(Number(value) || 0) % 1440) + 1440) % 1440;\n}\n\nfunction hhmm(value) {\n    if (value === null || value === undefined || !Number.isFinite(Number(value))) {\n        return null;\n    }\n\n    const m = normMin(value);\n    return (\n        String(Math.floor(m / 60)).padStart(2, \"0\") +\n        \":\" +\n        String(m % 60).padStart(2, \"0\")\n    );\n}\n\nfunction inWindow(now, start, end) {\n    now = normMin(now);\n    start = normMin(start);\n    end = normMin(end);\n\n    if (start === end) return false;\n\n    return start < end\n        ? now >= start && now < end\n        : now >= start || now < end;\n}\n\nfunction minutesUntil(now, end) {\n    let diff = normMin(end) - normMin(now);\n    if (diff < 0) diff += 1440;\n    return diff;\n}\n\n// ------------------------------------------------------\n// Europe/Vienna Zeit\n// ------------------------------------------------------\n\nfunction viennaMinutes() {\n    const text = new Intl.DateTimeFormat(\"sv-SE\", {\n        timeZone: \"Europe/Vienna\",\n        hour: \"2-digit\",\n        minute: \"2-digit\",\n        hour12: false\n    }).format(new Date());\n\n    const [h, m] = text.split(\":\").map(Number);\n    return h * 60 + m;\n}\n\nfunction viennaDateTime() {\n    return new Intl.DateTimeFormat(\"sv-SE\", {\n        timeZone: \"Europe/Vienna\",\n        year: \"numeric\",\n        month: \"2-digit\",\n        day: \"2-digit\",\n        hour: \"2-digit\",\n        minute: \"2-digit\",\n        second: \"2-digit\",\n        hour12: false\n    })\n        .format(new Date())\n        .replace(\" \", \"T\");\n}\n\nfunction viennaDateParts() {\n    const parts = new Intl.DateTimeFormat(\"en-CA\", {\n        timeZone: \"Europe/Vienna\",\n        year: \"numeric\",\n        month: \"2-digit\",\n        day: \"2-digit\"\n    }).formatToParts(new Date());\n\n    const out = {};\n\n    for (const part of parts) {\n        if (part.type !== \"literal\") {\n            out[part.type] = Number(part.value);\n        }\n    }\n\n    return {\n        year: out.year,\n        month: out.month,\n        day: out.day\n    };\n}\n\n// ------------------------------------------------------\n// Sonnenaufgang\n// NOAA-ähnliche Näherung wie bisher\n// ------------------------------------------------------\n\nconst d2r = v => v * Math.PI / 180;\nconst r2d = v => v * 180 / Math.PI;\nconst normDeg = v => ((v % 360) + 360) % 360;\n\nfunction dayOfYear(year, month, day) {\n    return Math.floor(\n        (\n            Date.UTC(year, month - 1, day) -\n            Date.UTC(year, 0, 0)\n        ) / 86400000\n    );\n}\n\nfunction sunriseUTC(year, month, day, lat, lon) {\n    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;\n\n    const n = dayOfYear(year, month, day);\n    const lngHour = lon / 15;\n    const t = n + ((6 - lngHour) / 24);\n\n    const M = 0.9856 * t - 3.289;\n\n    const L = normDeg(\n        M +\n        1.916 * Math.sin(d2r(M)) +\n        0.020 * Math.sin(d2r(2 * M)) +\n        282.634\n    );\n\n    let RA = normDeg(\n        r2d(\n            Math.atan(\n                0.91764 * Math.tan(d2r(L))\n            )\n        )\n    );\n\n    RA += Math.floor(L / 90) * 90 - Math.floor(RA / 90) * 90;\n    RA /= 15;\n\n    const sinDec = 0.39782 * Math.sin(d2r(L));\n    const cosDec = Math.cos(Math.asin(sinDec));\n\n    const cosH =\n        (\n            Math.cos(d2r(90.833)) -\n            sinDec * Math.sin(d2r(lat))\n        ) /\n        (\n            cosDec * Math.cos(d2r(lat))\n        );\n\n    if (cosH > 1 || cosH < -1) return null;\n\n    const H = (360 - r2d(Math.acos(cosH))) / 15;\n    const localMeanTime = H + RA - 0.06571 * t - 6.622;\n\n    let utcHour = localMeanTime - lngHour;\n    while (utcHour < 0) utcHour += 24;\n    while (utcHour >= 24) utcHour -= 24;\n\n    return new Date(\n        Date.UTC(year, month - 1, day) +\n        utcHour * 3600000\n    );\n}\n\nfunction dateToViennaMinutes(date) {\n    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;\n\n    const text = new Intl.DateTimeFormat(\"sv-SE\", {\n        timeZone: \"Europe/Vienna\",\n        hour: \"2-digit\",\n        minute: \"2-digit\",\n        hour12: false\n    }).format(date);\n\n    const [h, m] = text.split(\":\").map(Number);\n    return h * 60 + m;\n}\n\n// ------------------------------------------------------\n// Config\n// ------------------------------------------------------\n\nconst cfg = flow.get(CONFIG_KEY);\n\nif (!cfg || typeof cfg !== \"object\") {\n    msg.payload = {\n        ok: false,\n        error: \"strategy_v7_config fehlt\",\n        modbus_proposal: {\n            write_active: true,\n            storctl_mod: 0,\n            outwrte: 10000,\n            inwrte: 10000,\n            mode_reason: \"config_missing_verto_free\"\n        },\n        write: {\n            storctl_mod: 0,\n            outwrte: 10000,\n            inwrte: 10000\n        }\n    };\n\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"V7.4 Config fehlt → Verto frei\"\n    });\n\n    return msg;\n}\n\n// ------------------------------------------------------\n// Simulation\n// ------------------------------------------------------\n\nconst sim = msg.payload?.sim === true;\nconst si = sim ? msg.payload : {};\n\n// ------------------------------------------------------\n// Konfiguration\n// ------------------------------------------------------\n\nconst BATTERY_CAPACITY_KWH = Number(cfg.battery.capacity_kwh);\nconst BATTERY_POWER_REF_W = Number(cfg.battery.power_ref_w);\n\nconst DISCHARGE_ENABLED = cfg.discharge.enabled === true;\nconst DISCHARGE_OFFSET_MIN = Number(cfg.discharge.sunrise_offset_min);\nconst DISCHARGE_END_OFFSET_MIN = Number(cfg.discharge.sunrise_end_offset_min);\nconst MAX_DISCHARGE_POWER_W = Number(cfg.discharge.max_power_w);\nconst HOUSE_LOAD_MARGIN_W = Number(cfg.discharge.house_load_margin_w ?? 200);\n\nconst MIN_SOC = Number(cfg.reserve.min_soc_absolute);\nconst VERY_BAD_BELOW = Number(cfg.reserve.very_bad_below_kwh);\nconst TARGET_VERY_BAD = Number(cfg.reserve.target_soc_very_bad);\nconst WEAK_BELOW = Number(cfg.reserve.weak_below_kwh);\nconst TARGET_WEAK = Number(cfg.reserve.target_soc_weak);\nconst MEDIUM_BELOW = Number(cfg.reserve.medium_below_kwh);\nconst TARGET_MEDIUM = Number(cfg.reserve.target_soc_medium);\nconst TARGET_GOOD = Number(cfg.reserve.target_soc_good);\n\nconst CHARGE_BLOCK_ENABLED = cfg.charge_block.enabled === true;\nconst CHARGE_BLOCK_DURATION_MIN = Number(cfg.charge_block.duration_min);\nconst CHARGE_BLOCK_MIN_TODAY_KWH = Number(cfg.charge_block.min_today_kwh);\n\nconst CHARGE_LIMIT_ENABLED = cfg.charge_limit.enabled === true;\nconst VERY_GOOD_TODAY = Number(cfg.charge_limit.very_good_today_min_kwh);\nconst VERY_GOOD_PERCENT = Number(cfg.charge_limit.very_good_percent);\nconst GOOD_TODAY = Number(cfg.charge_limit.good_today_min_kwh);\nconst GOOD_PERCENT = Number(cfg.charge_limit.good_percent);\nconst MEDIUM_TODAY = Number(cfg.charge_limit.medium_today_min_kwh);\nconst MEDIUM_PERCENT = Number(cfg.charge_limit.medium_percent);\nconst WEAK_PERCENT = Number(cfg.charge_limit.weak_percent);\n\nconst wattsToWrte = watts =>\n    clamp(\n        Math.round(\n            Number(watts) / BATTERY_POWER_REF_W * WRTE_MAX\n        ),\n        0,\n        WRTE_MAX\n    );\n\nconst wrteToWatts = wrte =>\n    Math.round(\n        Number(wrte) / WRTE_MAX * BATTERY_POWER_REF_W\n    );\n\n// ------------------------------------------------------\n// Zeit / Sonnenaufgang\n// ------------------------------------------------------\n\nconst nowMinutes =\n    sim && finite(si.vienna_minutes) !== null\n        ? normMin(si.vienna_minutes)\n        : viennaMinutes();\n\nlet sunriseMinutes = null;\nlet sunriseSource = \"fallback\";\n\nif (sim && finite(si.sunrise_minutes) !== null) {\n    sunriseMinutes = normMin(si.sunrise_minutes);\n    sunriseSource = \"simulation\";\n}\nelse {\n    const lat = finite(cfg.location?.latitude);\n    const lon = finite(cfg.location?.longitude);\n\n    if (lat !== null && lon !== null) {\n        const d = viennaDateParts();\n\n        sunriseMinutes = dateToViennaMinutes(\n            sunriseUTC(\n                d.year,\n                d.month,\n                d.day,\n                lat,\n                lon\n            )\n        );\n\n        if (sunriseMinutes !== null) {\n            sunriseSource = \"calculated\";\n        }\n    }\n}\n\nconst dischargeStart =\n    sunriseMinutes !== null\n        ? normMin(sunriseMinutes - DISCHARGE_OFFSET_MIN)\n        : FALLBACK_DISCHARGE_START_MIN;\n\nconst dischargeEnd =\n    sunriseMinutes !== null\n        ? normMin(sunriseMinutes + DISCHARGE_END_OFFSET_MIN)\n        : normMin(\n            FALLBACK_DISCHARGE_END_MIN +\n            DISCHARGE_END_OFFSET_MIN\n        );\n\nconst inDischargeWindow =\n    DISCHARGE_ENABLED &&\n    inWindow(\n        nowMinutes,\n        dischargeStart,\n        dischargeEnd\n    );\n\nconst chargeBlockStart =\n    sunriseMinutes !== null\n        ? sunriseMinutes\n        : FALLBACK_DISCHARGE_END_MIN;\n\nconst chargeBlockEnd =\n    normMin(\n        chargeBlockStart +\n        CHARGE_BLOCK_DURATION_MIN\n    );\n\nconst inChargeBlockWindow =\n    CHARGE_BLOCK_ENABLED &&\n    inWindow(\n        nowMinutes,\n        chargeBlockStart,\n        chargeBlockEnd\n    );\n\n// ------------------------------------------------------\n// Externe Entladesperre\n// ------------------------------------------------------\n\nconst externalDischargeLock =\n    (sim && si.entladen_sperren === true) ||\n    msg.entladen_sperren === true ||\n    msg.payload?.entladen_sperren === true ||\n    flow.get(\"verto_discharge_lock\") === true;\n\nconst lockSources =\n    flow.get(\"verto_discharge_lock_sources\") ||\n    (\n        msg.lock_source\n            ? [msg.lock_source]\n            : []\n    );\n\nconst allLocks =\n    flow.get(\"verto_discharge_locks\") ||\n    {};\n\n// ------------------------------------------------------\n// Forecast\n// ------------------------------------------------------\n\nconst todayKwh =\n    sim\n        ? finite(si.forecast_today_kwh)\n        : finite(flow.get(\"forecast_today_kwh\"));\n\nconst tomorrowKwh =\n    sim\n        ? finite(si.forecast_tomorrow_kwh)\n        : finite(flow.get(\"forecast_tomorrow_kwh\"));\n\nconst todayDate =\n    flow.get(\"forecast_today_date\") ??\n    null;\n\nconst tomorrowDate =\n    flow.get(\"forecast_tomorrow_date\") ??\n    null;\n\nconst forecastSource =\n    flow.get(\"forecast_source\") ??\n    \"unknown\";\n\nconst forecastFallback =\n    sim\n        ? false\n        : Boolean(\n            flow.get(\"forecast_used_fallback\")\n        );\n\nconst todayForecastValid =\n    todayKwh !== null &&\n    !forecastFallback;\n\nconst reserveForecastValid =\n    todayKwh !== null &&\n    tomorrowKwh !== null &&\n    !forecastFallback;\n\n// ------------------------------------------------------\n// Livewerte\n// ------------------------------------------------------\n\nconst soc =\n    sim\n        ? finite(si.soc_percent)\n        : finite(flow.get(\"soc_percent\"));\n\nconst houseLoadW =\n    sim\n        ? finite(si.house_load_w)\n        : finite(flow.get(\"house_load_w\"));\n\nconst pvPowerW =\n    sim\n        ? finite(si.pv_power_w)\n        : finite(flow.get(\"pv_power_w\"));\n\nconst gridPowerW =\n    sim\n        ? finite(si.grid_power_w)\n        : finite(flow.get(\"grid_power_w\"));\n\nconst batteryPowerW =\n    sim\n        ? finite(si.battery_power_w)\n        : finite(flow.get(\"battery_power_w\"));\n\nconst batteryMode =\n    sim\n        ? \"simulation\"\n        : (flow.get(\"battery_mode\") ?? null);\n\nconst socValid = soc !== null;\nconst houseLoadValid = houseLoadW !== null;\nconst gridPowerValid = gridPowerW !== null;\n\n// ------------------------------------------------------\n// Reserve / Ziel-SOC\n//\n// HEUTE und MORGEN werden identisch klassifiziert.\n// Die schlechtere Klasse gewinnt.\n// ------------------------------------------------------\n\nfunction reserveClassFor(kwh) {\n    if (kwh < VERY_BAD_BELOW) {\n        return {\n            rank: 3,\n            name: \"VERY_BAD\",\n            targetSoc: TARGET_VERY_BAD\n        };\n    }\n\n    if (kwh < WEAK_BELOW) {\n        return {\n            rank: 2,\n            name: \"WEAK\",\n            targetSoc: TARGET_WEAK\n        };\n    }\n\n    if (kwh < MEDIUM_BELOW) {\n        return {\n            rank: 1,\n            name: \"MEDIUM\",\n            targetSoc: TARGET_MEDIUM\n        };\n    }\n\n    return {\n        rank: 0,\n        name: \"GOOD\",\n        targetSoc: TARGET_GOOD\n    };\n}\n\nlet reserveClass = \"UNKNOWN\";\nlet todayReserveClass = \"UNKNOWN\";\nlet tomorrowReserveClass = \"UNKNOWN\";\nlet targetSoc = clamp(TARGET_VERY_BAD, MIN_SOC, 100);\nlet reserveReason = \"forecast_invalid_safe_target\";\n\nif (reserveForecastValid) {\n    const todayReserve = reserveClassFor(todayKwh);\n    const tomorrowReserve = reserveClassFor(tomorrowKwh);\n\n    todayReserveClass = todayReserve.name;\n    tomorrowReserveClass = tomorrowReserve.name;\n\n    const combined =\n        todayReserve.rank >= tomorrowReserve.rank\n            ? todayReserve\n            : tomorrowReserve;\n\n    reserveClass = combined.name;\n    targetSoc = clamp(combined.targetSoc, MIN_SOC, 100);\n    reserveReason = \"worse_class_of_today_and_tomorrow\";\n}\n\n// ------------------------------------------------------\n// Strategische Entladung\n// ------------------------------------------------------\n\nlet strategicAllowed = false;\nlet strategicReason = \"not_evaluated\";\nlet energyToTargetKwh = 0;\nlet hoursUntilDischargeEnd = 0;\nlet calculatedDischargeW = 0;\nlet requiredDischargeW = 0;\n\nconst socAboveTarget =\n    socValid\n        ? Math.max(0, soc - targetSoc)\n        : 0;\n\nif (externalDischargeLock) {\n    strategicReason = \"external_discharge_lock\";\n}\nelse if (!DISCHARGE_ENABLED) {\n    strategicReason = \"strategic_discharge_disabled\";\n}\nelse if (!reserveForecastValid) {\n    strategicReason = \"forecast_invalid_no_strategic_discharge\";\n}\nelse if (!socValid) {\n    strategicReason = \"soc_missing_no_strategic_discharge\";\n}\nelse if (!inDischargeWindow) {\n    strategicReason = \"outside_discharge_window\";\n}\nelse if (soc <= targetSoc) {\n    strategicReason = \"target_soc_reached_stop_discharge\";\n}\nelse {\n    hoursUntilDischargeEnd =\n        Math.max(\n            1,\n            minutesUntil(\n                nowMinutes,\n                dischargeEnd\n            )\n        ) / 60;\n\n    energyToTargetKwh =\n        BATTERY_CAPACITY_KWH *\n        socAboveTarget /\n        100;\n\n    calculatedDischargeW =\n        energyToTargetKwh /\n        hoursUntilDischargeEnd *\n        1000;\n\n    requiredDischargeW =\n        Math.min(\n            calculatedDischargeW,\n            MAX_DISCHARGE_POWER_W,\n            BATTERY_POWER_REF_W\n        );\n\n    if (requiredDischargeW > 0) {\n        strategicAllowed = true;\n        strategicReason =\n            \"dynamic_discharge_to_target_by_discharge_end\";\n    }\n}\n\n// ------------------------------------------------------\n// Hauslast-Floor nur während strategischer Entladung\n// ------------------------------------------------------\n\nconst houseFloorW =\n    strategicAllowed &&\n    houseLoadValid &&\n    houseLoadW > 0\n        ? Math.max(\n            0,\n            houseLoadW +\n            HOUSE_LOAD_MARGIN_W\n        )\n        : 0;\n\nlet totalDischargeW = 0;\nlet totalOutwrte = 0;\n\nif (strategicAllowed) {\n    totalDischargeW =\n        clamp(\n            Math.max(\n                requiredDischargeW,\n                houseFloorW\n            ),\n            0,\n            BATTERY_POWER_REF_W\n        );\n\n    totalOutwrte =\n        wattsToWrte(\n            totalDischargeW\n        );\n}\n\n// ------------------------------------------------------\n// Ladeblock\n//\n// Keine zusätzliche SOC-Toleranz mehr:\n// - SOC < Ziel: Laden bis Ziel erlaubt\n// - SOC >= Ziel: Ladeblock darf greifen\n// ------------------------------------------------------\n\nlet chargeBlockAllowed = false;\nlet chargeBlockReason = \"not_evaluated\";\n\nif (externalDischargeLock) {\n    chargeBlockReason = \"external_discharge_lock\";\n}\nelse if (!CHARGE_BLOCK_ENABLED) {\n    chargeBlockReason = \"charge_block_disabled\";\n}\nelse if (!todayForecastValid) {\n    chargeBlockReason = \"forecast_invalid_no_charge_block\";\n}\nelse if (!socValid) {\n    chargeBlockReason = \"soc_missing_no_charge_block\";\n}\nelse if (!inChargeBlockWindow) {\n    chargeBlockReason = \"outside_charge_block_window\";\n}\nelse if (todayKwh < CHARGE_BLOCK_MIN_TODAY_KWH) {\n    chargeBlockReason = \"today_forecast_too_low_no_charge_block\";\n}\nelse if (soc < targetSoc) {\n    chargeBlockReason = \"soc_below_target_charge_to_target_allowed\";\n}\nelse {\n    chargeBlockAllowed = true;\n    chargeBlockReason = \"sunrise_charge_block_active\";\n}\n\n// ------------------------------------------------------\n// Ladebegrenzung nur nach HEUTE\n// ------------------------------------------------------\n\nlet chargeClass = \"WEAK\";\nlet maxChargePercent = 100;\nlet chargeLimitReason = \"not_evaluated\";\n\nif (!CHARGE_LIMIT_ENABLED) {\n    chargeClass = \"OFF\";\n    maxChargePercent = 100;\n    chargeLimitReason = \"charge_limit_disabled\";\n}\nelse if (!todayForecastValid) {\n    chargeClass = \"WEAK\";\n    maxChargePercent = 100;\n    chargeLimitReason = \"forecast_invalid_charge_unlimited\";\n}\nelse if (todayKwh >= VERY_GOOD_TODAY) {\n    chargeClass = \"VERY_GOOD\";\n    maxChargePercent = VERY_GOOD_PERCENT;\n    chargeLimitReason = \"very_good_forecast\";\n}\nelse if (todayKwh >= GOOD_TODAY) {\n    chargeClass = \"GOOD\";\n    maxChargePercent = GOOD_PERCENT;\n    chargeLimitReason = \"good_forecast\";\n}\nelse if (todayKwh >= MEDIUM_TODAY) {\n    chargeClass = \"MEDIUM\";\n    maxChargePercent = MEDIUM_PERCENT;\n    chargeLimitReason = \"medium_forecast\";\n}\nelse {\n    chargeClass = \"WEAK\";\n    maxChargePercent = WEAK_PERCENT;\n    chargeLimitReason = \"weak_forecast\";\n}\n\nmaxChargePercent =\n    clamp(\n        maxChargePercent,\n        0,\n        100\n    );\n\nconst maxChargeWrte =\n    Math.round(\n        maxChargePercent * 100\n    );\n\nconst chargeLimitActive =\n    !externalDischargeLock &&\n    CHARGE_LIMIT_ENABLED &&\n    todayForecastValid &&\n    maxChargeWrte < WRTE_MAX;\n\n// ------------------------------------------------------\n// Modbus-Priorität\n//\n// 0. externe Entladesperre -> Verto frei\n// 1. strategische Entladung\n// 2. Ladeblock\n// 3. Ladebegrenzung\n// 4. Fronius frei\n// ------------------------------------------------------\n\nlet storctl = 0;\nlet outwrte = 10000;\nlet inwrte = 10000;\nlet modeReason = \"verto_free_self_consumption_control\";\n\nif (externalDischargeLock) {\n    storctl = 0;\n    outwrte = 10000;\n    inwrte = 10000;\n    modeReason = \"external_discharge_lock_verto_free\";\n}\nelse if (strategicAllowed && totalOutwrte > 0) {\n    storctl = 3;\n    outwrte = totalOutwrte;\n    inwrte = -totalOutwrte;\n    modeReason =\n        \"forced_dynamic_discharge_to_target_by_discharge_end\";\n}\nelse if (chargeBlockAllowed) {\n    storctl = 1;\n    outwrte = 10000;\n    inwrte = 0;\n    modeReason =\n        \"charge_block_only_fronius_controls_discharge\";\n}\nelse if (chargeLimitActive) {\n    storctl = 1;\n    outwrte = 10000;\n    inwrte = maxChargeWrte;\n    modeReason =\n        \"forecast_charge_limit_only_fronius_controls_discharge\";\n}\n\n// ------------------------------------------------------\n// Flow-Werte / Kompatibilität\n// ------------------------------------------------------\n\nif (!sim) {\n    const values = {\n        external_discharge_lock_active: externalDischargeLock,\n        reserve_class: reserveClass,\n        reserve_today_class: todayReserveClass,\n        reserve_tomorrow_class: tomorrowReserveClass,\n        target_soc: targetSoc,\n        strategic_discharge_allowed: strategicAllowed,\n        charge_block_allowed: chargeBlockAllowed,\n        charge_limit_is_active: chargeLimitActive,\n        charge_limit_class: chargeClass,\n        max_charge_wrte: maxChargeWrte,\n        required_target_discharge_w: requiredDischargeW,\n        total_battery_discharge_w: totalDischargeW,\n        sunrise_min: sunriseMinutes,\n        sunrise_source: sunriseSource,\n        discharge_start_min: dischargeStart,\n        discharge_end_min: dischargeEnd,\n        charge_block_start_min: chargeBlockStart,\n        charge_block_end_min: chargeBlockEnd,\n        modbus_mode_reason: modeReason\n    };\n\n    for (const [key, value] of Object.entries(values)) {\n        flow.set(\n            \"strategy_v7_\" + key,\n            value\n        );\n    }\n\n    // Bestehender Downstream / Modbus_Befehle_bauen\n    flow.set(\"storctl_mod\", storctl);\n    flow.set(\"outwrte\", outwrte);\n    flow.set(\"inwrte\", inwrte);\n}\n\nconst writeActive =\n    !sim &&\n    (externalDischargeLock || socValid) &&\n    Number.isFinite(storctl) &&\n    Number.isFinite(outwrte) &&\n    Number.isFinite(inwrte);\n\n// ------------------------------------------------------\n// Output\n// ------------------------------------------------------\n\nmsg.payload = {\n    ok:\n        socValid &&\n        todayForecastValid &&\n        reserveForecastValid,\n\n    mode:\n        sim\n            ? \"simulation_v7_4\"\n            : \"v7_4_dynamic_sunrise\",\n\n    simulation: {\n        active: sim,\n        write_suppressed: sim\n    },\n\n    external_discharge_lock: {\n        active: externalDischargeLock,\n        sources: lockSources,\n        all_locks: allLocks,\n        reason:\n            externalDischargeLock\n                ? \"entladen_sperren_aktiv\"\n                : \"not_active\"\n    },\n\n    time: {\n        vienna_now:\n            sim\n                ? \"SIM \" + hhmm(nowMinutes)\n                : viennaDateTime(),\n\n        minutes: nowMinutes,\n        hhmm: hhmm(nowMinutes),\n\n        sunrise:\n            sunriseMinutes === null\n                ? null\n                : hhmm(sunriseMinutes),\n\n        sunrise_minutes: sunriseMinutes,\n        sunrise_source: sunriseSource,\n\n        in_discharge_window: inDischargeWindow,\n        discharge_start: hhmm(dischargeStart),\n        discharge_end: hhmm(dischargeEnd),\n        discharge_window:\n            hhmm(dischargeStart) +\n            \"-\" +\n            hhmm(dischargeEnd),\n\n        charge_block_start: hhmm(chargeBlockStart),\n        charge_block_end: hhmm(chargeBlockEnd),\n        charge_block_window:\n            hhmm(chargeBlockStart) +\n            \"-\" +\n            hhmm(chargeBlockEnd)\n    },\n\n    inputs: {\n        forecast_today_date: todayDate,\n        forecast_today_kwh:\n            todayKwh === null ? null : round1(todayKwh),\n\n        forecast_tomorrow_date: tomorrowDate,\n        forecast_tomorrow_kwh:\n            tomorrowKwh === null ? null : round1(tomorrowKwh),\n\n        forecast_source: forecastSource,\n        forecast_used_fallback: forecastFallback,\n\n        soc_percent:\n            socValid ? round1(soc) : null,\n\n        house_load_w:\n            houseLoadValid ? round0(houseLoadW) : null,\n\n        pv_power_w:\n            pvPowerW !== null ? round0(pvPowerW) : null,\n\n        grid_power_w:\n            gridPowerValid ? round0(gridPowerW) : null,\n\n        battery_power_w:\n            batteryPowerW !== null ? round0(batteryPowerW) : null,\n\n        battery_mode: batteryMode\n    },\n\n    reserve: {\n        reserve_class: reserveClass,\n        today_class: todayReserveClass,\n        tomorrow_class: tomorrowReserveClass,\n        target_soc: targetSoc,\n        min_soc_absolute: MIN_SOC,\n        reason: reserveReason\n    },\n\n    strategic_discharge: {\n        enabled: DISCHARGE_ENABLED,\n        allowed: strategicAllowed,\n        reason: strategicReason,\n\n        soc_above_target_percent:\n            round1(socAboveTarget),\n\n        energy_to_target_kwh:\n            round1(energyToTargetKwh),\n\n        hours_until_discharge_end:\n            round1(hoursUntilDischargeEnd),\n\n        calculated_discharge_w:\n            round0(calculatedDischargeW),\n\n        max_discharge_power_w:\n            MAX_DISCHARGE_POWER_W,\n\n        required_target_discharge_w:\n            round0(requiredDischargeW),\n\n        house_load_floor_w:\n            round0(houseFloorW),\n\n        house_load_margin_w:\n            HOUSE_LOAD_MARGIN_W\n    },\n\n    charge_block: {\n        enabled: CHARGE_BLOCK_ENABLED,\n        allowed: chargeBlockAllowed,\n        reason: chargeBlockReason,\n        start: hhmm(chargeBlockStart),\n        until: hhmm(chargeBlockEnd),\n        duration_min: CHARGE_BLOCK_DURATION_MIN,\n        min_today_kwh: CHARGE_BLOCK_MIN_TODAY_KWH\n    },\n\n    charge_limit: {\n        enabled: CHARGE_LIMIT_ENABLED,\n        active: chargeLimitActive,\n        class: chargeClass,\n        max_charge_percent: round1(maxChargePercent),\n        max_charge_wrte: maxChargeWrte,\n        estimated_max_charge_power_w:\n            wrteToWatts(maxChargeWrte),\n        reason:\n            externalDischargeLock\n                ? \"external_discharge_lock\"\n                : chargeLimitReason\n    },\n\n    discharge_command: {\n        battery_capacity_kwh: BATTERY_CAPACITY_KWH,\n        battery_power_ref_w: BATTERY_POWER_REF_W,\n        total_battery_discharge_w:\n            round0(totalDischargeW),\n        total_outwrte: totalOutwrte,\n        total_outwrte_percent:\n            round1(totalOutwrte / 100),\n        estimated_power_from_outwrte_w:\n            wrteToWatts(totalOutwrte)\n    },\n\n    modbus_proposal: {\n        write_active: writeActive,\n        storctl_mod: storctl,\n        outwrte,\n        inwrte,\n        mode_reason: modeReason,\n\n        safety: {\n            today_forecast_valid: todayForecastValid,\n            reserve_forecast_valid: reserveForecastValid,\n            soc_valid: socValid,\n            grid_power_valid: gridPowerValid,\n            house_load_valid: houseLoadValid,\n            simulation_write_blocked: sim\n        }\n    },\n\n    // Kompatibel mit Modbus_Befehle_bauen\n    write: {\n        storctl_mod: storctl,\n        outwrte,\n        inwrte\n    }\n};\n\n// ------------------------------------------------------\n// Node Status\n// ------------------------------------------------------\n\nlet status = {\n    fill: \"green\",\n    shape: \"dot\",\n    text: \"Fronius regelt selbst\"\n};\n\nif (sim) {\n    status = {\n        fill: \"grey\",\n        shape: \"ring\",\n        text: \"SIM | kein Write\"\n    };\n}\nelse if (externalDischargeLock) {\n    status = {\n        fill: \"red\",\n        shape: \"ring\",\n        text:\n            lockSources.length\n                ? \"Entladen gesperrt: \" + lockSources.join(\", \")\n                : \"Entladen gesperrt | Verto frei\"\n    };\n}\nelse if (strategicAllowed && totalOutwrte > 0) {\n    status = {\n        fill: \"blue\",\n        shape: \"dot\",\n        text:\n            `Strategisch ${round0(totalDischargeW)} W → ${round1(targetSoc)}%`\n    };\n}\nelse if (\n    inDischargeWindow &&\n    socValid &&\n    soc <= targetSoc\n) {\n    status = {\n        fill: \"green\",\n        shape: \"dot\",\n        text:\n            `Ziel-SOC ${round1(targetSoc)}% erreicht | Fronius frei`\n    };\n}\nelse if (chargeBlockAllowed) {\n    status = {\n        fill: \"yellow\",\n        shape: \"ring\",\n        text: \"Laden gesperrt | Entladen Fronius\"\n    };\n}\nelse if (chargeLimitActive) {\n    status = {\n        fill: \"yellow\",\n        shape: \"ring\",\n        text:\n            `Laden max. ${round1(maxChargePercent)}% | Entladen Fronius`\n    };\n}\n\nnode.status(status);\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
@@ -465,20 +728,21 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 170,
-        "y": 300,
+        "x": 405,
+        "y": 635,
         "wires": [
             [
-                "8a23fb970444f86c",
-                "749ddfd6017af057"
+                "377ef37c09a350ee",
+                "b6eea9f57c997369"
             ]
-        ]
+        ],
+        "g": "b886f3f9b6614672"
     },
     {
         "id": "39a1173ec91818b4",
         "type": "inject",
         "z": "6301e7be3ca6daa7",
-        "name": "Inject 4:00h ",
+        "name": "04:00 + Start",
         "props": [
             {
                 "p": "payload"
@@ -495,20 +759,20 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 110,
-        "y": 40,
+        "x": 220,
+        "y": 270,
         "wires": [
             [
-                "27537240031a7b38",
-                "2a8d588540a1878d"
+                "358ed3b6ef546205"
             ]
-        ]
+        ],
+        "g": "1dcc23f7b69e8173"
     },
     {
         "id": "73f0cb4e61668d0e",
         "type": "inject",
         "z": "6301e7be3ca6daa7",
-        "name": "Cyclic 1s",
+        "name": "alle 5 s",
         "props": [
             {
                 "p": "payload"
@@ -525,19 +789,20 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 110,
-        "y": 240,
+        "x": 200,
+        "y": 80,
         "wires": [
             [
-                "fd347b5e56e72cd2"
+                "408dfc86275a90b4"
             ]
-        ]
+        ],
+        "g": "d7616d62d4932c6b"
     },
     {
         "id": "8a23fb970444f86c",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Modbus_Befehle_bauen",
+        "name": "Modbus-Befehle bauen",
         "func": "// ======================================================\n// NODE: Modbus_Befehle_bauen V6.2\n// Zweck:\n// - Liest den aktiven Modbus-Vorschlag aus Strategie_V6_Debug\n// - Baut daraus Modbus-Flex-Write Messages\n// - Unterstützt 3 Register:\n//     1) StorCtl_Mod\n//     2) OutWRte\n//     3) InWRte\n// - Unterstützt jetzt negative InWRte-Werte für erzwungene Entladung\n// - Schreibt NICHT selbst, sondern gibt fertige Messages aus\n// - Verhindert unnötiges Dauerschreiben\n// - Refresh alle 60 Sekunden\n//\n// FUNKTIONIERENDE ENTLADE-VARIANTE:\n//   StorCtl_Mod = 3\n//   OutWRte     = +X\n//   InWRte      = -X\n//\n// Beispiel:\n//   X = 1000 bedeutet 10 % der Batterieleistung,\n//   nicht 1000 W direkt.\n// ======================================================\n\n\n// ======================================================\n// 1) MODBUS PARAMETER\n// ======================================================\n\n// Verto / Fronius Modbus Unit ID\nconst UNIT_ID = 1;\n\n// ------------------------------------------------------\n// Getestete Node-RED-Adressen\n// ------------------------------------------------------\n//\n// StorCtl_Mod:\n//   Node-RED-Adresse: 40368\n//\n// OutWRte:\n//   Node-RED-Adresse: 40375\n//\n// InWRte:\n//   Node-RED-Adresse: 40376\n// ------------------------------------------------------\n\nconst REG_STORCTL_MOD = 40368;\nconst REG_OUTWRTE     = 40375;\nconst REG_INWRTE      = 40376;\n\n// FC6 = Write Single Holding Register\nconst FC_WRITE_SINGLE = 6;\n\n// Bei gleichem Sollwert trotzdem alle 60 Sekunden refreshen\nconst REFRESH_MS = 60_000;\n\n// Sicherheitsgrenzen für WRte-Werte\n// -10000 = -100 %\n// 0      = 0 %\n// 10000  = 100 %\nconst WRTE_MIN_SIGNED = -10000;\nconst WRTE_MAX_SIGNED =  10000;\n\nconst WRTE_MIN_POSITIVE = 0;\nconst WRTE_MAX_POSITIVE = 10000;\n\n\n// ======================================================\n// 2) INPUT ROBUST EINLESEN\n// ======================================================\n\n// Unterstützte Eingänge:\n// - msg.control\n// - msg.payload.control\n// - msg.payload.modbus_proposal\n\nconst proposal =\n    msg.control ??\n    msg.payload?.control ??\n    msg.payload?.modbus_proposal;\n\nif (!proposal) {\n    msg.payload = {\n        error: true,\n        reason: \"Weder msg.control noch msg.payload.modbus_proposal vorhanden\",\n        available_payload_keys: Object.keys(msg.payload || {}),\n        ts: new Date().toISOString()\n    };\n\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"keine Modbus-Proposal-Daten\"\n    });\n\n    return [null, msg];\n}\n\n\n// ======================================================\n// 3) FELDER AUS STRATEGIE LESEN\n// ======================================================\n\nconst writeActive = proposal.write_active === true;\n\nconst storctlModRaw =\n    proposal.storctl_mod ??\n    proposal.storage_control_mode ??\n    proposal.storageControlMode;\n\nconst outwrteRaw =\n    proposal.outwrte ??\n    proposal.outwrte_w ??\n    proposal.outwrte_value ??\n    0;\n\n// Wichtig:\n// null bedeutet: InWRte NICHT schreiben.\n// Zahl bedeutet: InWRte ausdrücklich schreiben.\n// Negative Werte sind jetzt erlaubt und wichtig.\n// Beispiel:\n//   inwrte = -1000 erzwingt gemeinsam mit mode=3 und outwrte=1000 Entladung.\nconst inwrteRaw =\n    proposal.inwrte ??\n    null;\n\n\n// ======================================================\n// 4) WENN STRATEGIE NICHT SCHREIBEN WILL\n// ======================================================\n\nif (!writeActive) {\n    msg.payload = {\n        skipped: true,\n        reason: \"Strategie meldet write_active=false - kein Modbus Write\",\n\n        proposal: {\n            storctl_mod: storctlModRaw,\n            outwrte: outwrteRaw,\n            inwrte: inwrteRaw,\n            note: proposal.note ?? null,\n            safety: proposal.safety ?? null\n        },\n\n        ts: new Date().toISOString()\n    };\n\n    node.status({\n        fill: \"grey\",\n        shape: \"ring\",\n        text: \"write_active=false\"\n    });\n\n    return [null, msg];\n}\n\n\n// ======================================================\n// 5) PFLICHTWERTE PRÜFEN\n// ======================================================\n\nif (typeof storctlModRaw !== \"number\" || !Number.isFinite(storctlModRaw)) {\n    msg.payload = {\n        error: true,\n        reason: \"storctl_mod fehlt oder ist keine gültige Zahl\",\n        received_proposal: proposal,\n        ts: new Date().toISOString()\n    };\n\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"storctl_mod ungültig\"\n    });\n\n    return [null, msg];\n}\n\nif (typeof outwrteRaw !== \"number\" || !Number.isFinite(outwrteRaw)) {\n    msg.payload = {\n        error: true,\n        reason: \"outwrte fehlt oder ist keine gültige Zahl\",\n        received_proposal: proposal,\n        ts: new Date().toISOString()\n    };\n\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"outwrte ungültig\"\n    });\n\n    return [null, msg];\n}\n\nif (\n    inwrteRaw !== null &&\n    (typeof inwrteRaw !== \"number\" || !Number.isFinite(inwrteRaw))\n) {\n    msg.payload = {\n        error: true,\n        reason: \"inwrte ist nicht null, aber auch keine gültige Zahl\",\n        received_proposal: proposal,\n        ts: new Date().toISOString()\n    };\n\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"inwrte ungültig\"\n    });\n\n    return [null, msg];\n}\n\n\n// ======================================================\n// 6) WERTE NORMALISIEREN\n// ======================================================\n\n// StorCtl_Mod:\n// 0 = externe Steuerung aus\n// 1 = Ladelimit aktiv\n// 2 = Entladelimit aktiv\n// 3 = Lade- und Entladelimit aktiv\nconst mode = Math.trunc(storctlModRaw);\n\n// Sicherheit: nur 0..3 erlauben\nif (mode < 0 || mode > 3) {\n    msg.payload = {\n        error: true,\n        reason: \"storctl_mod außerhalb erlaubtem Bereich 0..3\",\n        mode,\n        received_proposal: proposal,\n        ts: new Date().toISOString()\n    };\n\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"storctl_mod außerhalb 0..3\"\n    });\n\n    return [null, msg];\n}\n\n// ------------------------------------------------------\n// OutWRte:\n// Immer positiv 0..10000.\n// ------------------------------------------------------\nlet outwrte = Math.round(Math.abs(outwrteRaw));\noutwrte = Math.max(WRTE_MIN_POSITIVE, Math.min(outwrte, WRTE_MAX_POSITIVE));\n\n// ------------------------------------------------------\n// InWRte:\n// Jetzt signed!\n// - null bleibt null und wird nicht geschrieben.\n// - positive Werte: Ladefreigabe / Ladebegrenzung\n// - negative Werte: für erzwungene Entladung relevant\n// ------------------------------------------------------\nlet inwrte = null;\n\nif (inwrteRaw !== null) {\n    inwrte = Math.round(Number(inwrteRaw));\n    inwrte = Math.max(WRTE_MIN_SIGNED, Math.min(inwrte, WRTE_MAX_SIGNED));\n}\n\n// ------------------------------------------------------\n// Sauberer Freigabezustand:\n// Wenn mode=0, externe Steuerung aus.\n// Dann schreiben wir bewusst OutWRte=10000 und InWRte=10000,\n// damit keine alten Begrenzungen im Register stehen bleiben.\n// ------------------------------------------------------\nif (mode === 0) {\n    outwrte = 10000;\n    inwrte = 10000;\n}\n\n\n// ======================================================\n// 7) SIGNED INT16 -> RAW UINT16\n// ======================================================\n//\n// Modbus-Register schreibt rohe 16 Bit.\n// Negative int16-Werte müssen als uint16 übertragen werden.\n//\n// Beispiele:\n//   -1000 -> 65536 - 1000 = 64536\n//   -5000 -> 65536 - 5000 = 60536\n//\n// Positive Werte bleiben gleich.\n// ======================================================\n\nfunction signedToUint16(value) {\n    const n = Math.round(Number(value));\n\n    if (!Number.isFinite(n)) {\n        return 0;\n    }\n\n    if (n < 0) {\n        return 65536 + n;\n    }\n\n    return n;\n}\n\n\n// ======================================================\n// 8) WRITE-GUARD\n// ======================================================\n//\n// Zweck:\n// - Nicht alle 5 Sekunden blind schreiben\n// - Nur schreiben, wenn sich mode, outwrte oder inwrte ändern\n// - Oder spätestens alle 60 Sekunden refreshen\n//\n// Wichtig:\n// inwrte=null, inwrte=0 und inwrte=-1000 sind verschieden.\n// null  = Register nicht schreiben\n// 0     = Register aktiv auf 0 schreiben\n// -1000 = signed Vorgabe, raw als 64536 schreiben\n// ======================================================\n\nconst now = Date.now();\n\nconst last = flow.get(\"v6.modbus.last_write\") || {\n    mode: null,\n    outwrte: null,\n    inwrte: \"__unset__\",\n    ts: 0\n};\n\nconst changed =\n    last.mode !== mode ||\n    last.outwrte !== outwrte ||\n    last.inwrte !== inwrte;\n\nconst refreshDue =\n    now - (last.ts || 0) >= REFRESH_MS;\n\nif (!changed && !refreshDue) {\n    msg.payload = {\n        skipped: true,\n        reason: \"Sollwerte unverändert, Refresh noch nicht fällig\",\n\n        values: {\n            mode,\n            storctl_mod: mode,\n            outwrte,\n            inwrte\n        },\n\n        raw_values: {\n            outwrte_raw_uint16: signedToUint16(outwrte),\n            inwrte_raw_uint16: inwrte === null ? null : signedToUint16(inwrte)\n        },\n\n        age_ms: now - last.ts,\n        next_refresh_in_ms: Math.max(0, REFRESH_MS - (now - last.ts)),\n        ts: new Date().toISOString()\n    };\n\n    node.status({\n        fill: \"grey\",\n        shape: \"ring\",\n        text: `skip | M=${mode} O=${outwrte} I=${inwrte}`\n    });\n\n    return [null, msg];\n}\n\n\n// ======================================================\n// 9) MODBUS WRITE MESSAGE HILFSFUNKTION\n// ======================================================\n\nfunction buildWriteMsg(name, address, signedValue) {\n    const rawValue = signedToUint16(signedValue);\n\n    return {\n        topic: `write_${name}`,\n\n        payload: {\n            value: [rawValue],\n            fc: FC_WRITE_SINGLE,\n            unitid: UNIT_ID,\n            address: address,\n            quantity: 1\n        },\n\n        modbus_write: {\n            name,\n            address,\n            signed_value: signedValue,\n            raw_uint16_value: rawValue,\n            fc: FC_WRITE_SINGLE,\n            unitid: UNIT_ID\n        },\n\n        original_strategy: msg.payload\n    };\n}\n\n\n// ======================================================\n// 10) MODBUS WRITE MESSAGES BAUEN\n// ======================================================\n//\n// Reihenfolge:\n//\n// Wenn mode = 0:\n//   1. StorCtl_Mod zuerst auf 0\n//   2. OutWRte auf 10000\n//   3. InWRte auf 10000\n//\n// Wenn mode > 0:\n//   1. OutWRte schreiben\n//   2. InWRte schreiben, falls inwrte !== null\n//   3. StorCtl_Mod zuletzt schreiben\n//\n// Grund:\n// - Beim Aktivieren zuerst Grenzwerte setzen, dann Modus aktivieren.\n// - Beim Freigeben zuerst Modus ausschalten.\n// ======================================================\n\nconst writeMessages = [];\n\nif (mode === 0) {\n    writeMessages.push(\n        buildWriteMsg(\"storctl_mod\", REG_STORCTL_MOD, mode)\n    );\n\n    writeMessages.push(\n        buildWriteMsg(\"outwrte\", REG_OUTWRTE, outwrte)\n    );\n\n    writeMessages.push(\n        buildWriteMsg(\"inwrte\", REG_INWRTE, inwrte)\n    );\n} else {\n    writeMessages.push(\n        buildWriteMsg(\"outwrte\", REG_OUTWRTE, outwrte)\n    );\n\n    if (inwrte !== null) {\n        writeMessages.push(\n            buildWriteMsg(\"inwrte\", REG_INWRTE, inwrte)\n        );\n    }\n\n    writeMessages.push(\n        buildWriteMsg(\"storctl_mod\", REG_STORCTL_MOD, mode)\n    );\n}\n\n\n// ======================================================\n// 11) STATE SPEICHERN\n// ======================================================\n\nflow.set(\"v6.modbus.last_write\", {\n    mode,\n    outwrte,\n    inwrte,\n    ts: now,\n    iso: new Date().toISOString()\n});\n\n\n// ======================================================\n// 12) DEBUG MESSAGE\n// ======================================================\n\nconst debugMsg = {\n    topic: \"v6_modbus_write_debug\",\n\n    payload: {\n        write: changed ? \"changed\" : \"refresh\",\n\n        values: {\n            mode,\n            storctl_mod: mode,\n            outwrte,\n            inwrte\n        },\n\n        raw_values: {\n            outwrte_raw_uint16: signedToUint16(outwrte),\n            inwrte_raw_uint16: inwrte === null ? null : signedToUint16(inwrte)\n        },\n\n        interpretation: {\n            mode_text:\n                mode === 0 ? \"externe Speichersteuerung aus\" :\n                mode === 1 ? \"Ladelimit aktiv\" :\n                mode === 2 ? \"Entladelimit aktiv\" :\n                mode === 3 ? \"Lade- und Entladelimit aktiv\" :\n                \"unbekannt\",\n\n            force_discharge_active:\n                mode === 3 &&\n                typeof inwrte === \"number\" &&\n                inwrte < 0 &&\n                outwrte > 0,\n\n            note:\n                mode === 3 && inwrte < 0\n                    ? \"Funktionierende Entladevariante: OutWRte positiv, InWRte negativ\"\n                    : null\n        },\n\n        registers: {\n            storctl_mod_address: REG_STORCTL_MOD,\n            outwrte_address: REG_OUTWRTE,\n            inwrte_address: REG_INWRTE,\n            fc: FC_WRITE_SINGLE,\n            unitid: UNIT_ID\n        },\n\n        messages_built: writeMessages.map(m => ({\n            topic: m.topic,\n            address: m.payload.address,\n            signed_value: m.modbus_write.signed_value,\n            raw_uint16_value: m.payload.value[0],\n            fc: m.payload.fc,\n            unitid: m.payload.unitid\n        })),\n\n        proposal_note: proposal.note ?? null,\n        proposal_safety: proposal.safety ?? null,\n\n        ts: new Date().toISOString()\n    }\n};\n\n\n// ======================================================\n// 13) NODE STATUS\n// ======================================================\n\nlet statusText = `M=${mode} O=${outwrte} I=${inwrte}`;\n\nif (mode === 0) {\n    statusText = `FREI | ${statusText}`;\n} else if (mode === 3 && inwrte < 0 && outwrte > 0) {\n    statusText = `FORCE DISCHARGE | ${statusText}`;\n} else if (mode === 3) {\n    statusText = `MODE 3 | ${statusText}`;\n} else if (mode === 2) {\n    statusText = `MODE 2 | ${statusText}`;\n}\n\nnode.status({\n    fill: mode === 0 ? \"green\" : \"yellow\",\n    shape: \"dot\",\n    text: statusText\n});\n\n\n// ======================================================\n// 14) OUTPUT\n// ======================================================\n//\n// Ausgang 1:\n// - echte Modbus-Flex-Write Messages\n//\n// Ausgang 2:\n// - Debug / Zusammenfassung\n// ======================================================\n\nreturn [\n    writeMessages,\n    debugMsg\n];",
         "outputs": 2,
         "timeout": 0,
@@ -545,20 +810,21 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 450,
-        "y": 300,
+        "x": 415,
+        "y": 870,
         "wires": [
             [
                 "6a4f9692f8ab6f8b"
             ],
             []
-        ]
+        ],
+        "g": "18314bc9cc35f1d1"
     },
     {
         "id": "6a4f9692f8ab6f8b",
         "type": "modbus-flex-write",
         "z": "6301e7be3ca6daa7",
-        "name": "Write_Verto",
+        "name": "Write Verto",
         "showStatusActivities": false,
         "showErrors": false,
         "showWarnings": true,
@@ -567,18 +833,19 @@
         "keepMsgProperties": false,
         "delayOnStart": false,
         "startDelayTime": "",
-        "x": 670,
-        "y": 300,
+        "x": 640,
+        "y": 870,
         "wires": [
             [],
             []
-        ]
+        ],
+        "g": "18314bc9cc35f1d1"
     },
     {
         "id": "dd906061c91cefab",
         "type": "modbus-flex-getter",
         "z": "6301e7be3ca6daa7",
-        "name": "Readback_Fronius",
+        "name": "Readback Verto",
         "showStatusActivities": false,
         "showErrors": false,
         "showWarnings": true,
@@ -592,20 +859,21 @@
         "delayOnStart": false,
         "enableDeformedMessages": false,
         "startDelayTime": "",
-        "x": 490,
-        "y": 580,
+        "x": 610,
+        "y": 940,
         "wires": [
             [
                 "5d8719fff1ac5474"
             ],
             []
-        ]
+        ],
+        "g": "18314bc9cc35f1d1"
     },
     {
         "id": "ee052407ba2b7968",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Readback",
+        "name": "Readback-Anfragen",
         "func": "// ======================================================\n// NODE: Readback_Befehle_bauen\n// Zweck:\n// - Baut Modbus-Flex-Getter Requests\n// - Liest die aktuellen Verto-Register zurück\n// - Register:\n//     1) StorCtl_Mod\n//     2) OutWRte\n//     3) InWRte\n// ======================================================\n\n\n// ======================================================\n// 1) MODBUS PARAMETER\n// ======================================================\n\nconst UNIT_ID = 1;\n\n// Getestete Node-RED-Adressen aus V5\nconst REG_STORCTL_MOD = 40368;\nconst REG_OUTWRTE     = 40375;\nconst REG_INWRTE      = 40376;\n\n// FC3 = Read Holding Register\nconst FC_READ_HOLDING = 3;\n\n\n// ======================================================\n// 2) READ REQUESTS BAUEN\n// ======================================================\n\nconst readOutwrte = {\n    topic: \"read_outwrte\",\n    payload: {\n        fc: FC_READ_HOLDING,\n        unitid: UNIT_ID,\n        address: REG_OUTWRTE,\n        quantity: 1\n    }\n};\n\nconst readStorctlMod = {\n    topic: \"read_storctl_mod\",\n    payload: {\n        fc: FC_READ_HOLDING,\n        unitid: UNIT_ID,\n        address: REG_STORCTL_MOD,\n        quantity: 1\n    }\n};\n\nconst readInwrte = {\n    topic: \"read_inwrte\",\n    payload: {\n        fc: FC_READ_HOLDING,\n        unitid: UNIT_ID,\n        address: REG_INWRTE,\n        quantity: 1\n    }\n};\n\n\n// ======================================================\n// 3) STATUS AM NODE\n// ======================================================\n\nnode.status({\n    fill: \"blue\",\n    shape: \"dot\",\n    text: \"Readback Requests: O/M/I\"\n});\n\n\n// ======================================================\n// 4) OUTPUT\n// ======================================================\n\nreturn [[\n    readOutwrte,\n    readStorctlMod,\n    readInwrte\n]];",
         "outputs": 1,
         "timeout": 0,
@@ -613,19 +881,20 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 280,
-        "y": 580,
+        "x": 395,
+        "y": 940,
         "wires": [
             [
                 "dd906061c91cefab"
             ]
-        ]
+        ],
+        "g": "18314bc9cc35f1d1"
     },
     {
         "id": "f274361449082e27",
         "type": "inject",
         "z": "6301e7be3ca6daa7",
-        "name": "Cyclic 20s",
+        "name": "alle 20 s",
         "props": [
             {
                 "p": "payload"
@@ -642,19 +911,20 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 110,
-        "y": 580,
+        "x": 200,
+        "y": 940,
         "wires": [
             [
                 "ee052407ba2b7968"
             ]
-        ]
+        ],
+        "g": "18314bc9cc35f1d1"
     },
     {
         "id": "5d8719fff1ac5474",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Status",
+        "name": "Readback-Status",
         "func": "// ======================================================\n// NODE: Readback_Status\n// Zweck:\n// - Formatiert Modbus-Readback vom Verto\n// - Speichert Istwerte in flow\n// - Zeigt Live-Status schön lesbar direkt im Node-RED-Flow\n//\n// Anzeige-Beispiele:\n//   ✅ Frei | Entl. 0% | Laden roh -6000 | 0s\n//   🔵 Entladen | Entl. 24% | Laden frei | 1s\n//   🟡 Ladeblock | Entl. 0% | Laden 0% | 0s\n//\n// Bedeutung:\n//   M = StorCtl_Mod\n//   O = OutWRte\n//   I = InWRte\n// ======================================================\n\n\n// ======================================================\n// 1) HILFSFUNKTIONEN\n// ======================================================\n\nfunction extractRegisterValue(payload, msg) {\n    // Häufig bei node-red-contrib-modbus:\n    // msg.payload.data = [wert]\n    if (Array.isArray(payload?.data)) {\n        return payload.data[0];\n    }\n\n    // Manche Antworten haben msg.responseBuffer.data\n    if (Array.isArray(msg?.responseBuffer?.data)) {\n        return msg.responseBuffer.data[0];\n    }\n\n    // Manche Antworten haben payload.responseBuffer.data\n    if (Array.isArray(payload?.responseBuffer?.data)) {\n        return payload.responseBuffer.data[0];\n    }\n\n    // Direktes Array\n    if (Array.isArray(payload)) {\n        return payload[0];\n    }\n\n    // Buffer-Array\n    if (Array.isArray(payload?.buffer)) {\n        return payload.buffer[0];\n    }\n\n    // Fallback\n    return payload;\n}\n\nfunction asNumberOrNull(value) {\n    const n = Number(value);\n    return Number.isFinite(n) ? n : null;\n}\n\n// Wandelt 16-bit unsigned Rohwert in signed INT16 um.\n// Beispiel:\n// 59536 → -6000\nfunction uint16ToInt16(value) {\n    if (value === null || value === undefined) return null;\n\n    const n = Number(value);\n    if (!Number.isFinite(n)) return null;\n\n    return n > 32767 ? n - 65536 : n;\n}\n\n// Fronius WRte:\n// 0     = 0 %\n// 10000 = 100 %\nfunction wrteToPercent(value) {\n    if (value === null || value === undefined) return null;\n\n    const n = Number(value);\n    if (!Number.isFinite(n)) return null;\n\n    return Math.round((n / 10000) * 100);\n}\n\nfunction textOrQuestion(value) {\n    return value === null || value === undefined ? \"?\" : String(value);\n}\n\nfunction percentTextFromWrte(value) {\n    const p = wrteToPercent(value);\n    return p === null ? \"?\" : `${p}%`;\n}\n\n\n// ======================================================\n// 2) WERT AUS MODBUS-ANTWORT LESEN\n// ======================================================\n\nconst rawValue = extractRegisterValue(msg.payload, msg);\nconst rawNumber = asNumberOrNull(rawValue);\nconst signedValue = uint16ToInt16(rawNumber);\n\n\n// ======================================================\n// 3) JE NACH TOPIC IM FLOW SPEICHERN\n// ======================================================\n\nif (msg.topic === \"read_storctl_mod\") {\n    // StorCtl_Mod ist normal unsigned 0..3\n    flow.set(\"readback.storctl_mod_raw\", rawNumber);\n    flow.set(\"readback.storctl_mod\", rawNumber);\n    flow.set(\"readback.storctl_mod_ts\", Date.now());\n}\n\nelse if (msg.topic === \"read_outwrte\") {\n    // OutWRte ist 0..10000\n    flow.set(\"readback.outwrte_raw\", rawNumber);\n    flow.set(\"readback.outwrte_signed\", signedValue);\n    flow.set(\"readback.outwrte\", rawNumber);\n    flow.set(\"readback.outwrte_ts\", Date.now());\n}\n\nelse if (msg.topic === \"read_inwrte\") {\n    // InWRte kann als signed INT16 zurückkommen.\n    // Beispiel 59536 raw = -6000 signed.\n    flow.set(\"readback.inwrte_raw\", rawNumber);\n    flow.set(\"readback.inwrte_signed\", signedValue);\n    flow.set(\"readback.inwrte\", signedValue);\n    flow.set(\"readback.inwrte_ts\", Date.now());\n}\n\nelse {\n    node.warn(`Unbekanntes Readback-Topic: ${msg.topic}`);\n}\n\n\n// ======================================================\n// 4) AKTUELLE ISTWERTE AUS FLOW HOLEN\n// ======================================================\n\nconst storctlMod = flow.get(\"readback.storctl_mod\");\nconst outwrte    = flow.get(\"readback.outwrte\");\nconst inwrte     = flow.get(\"readback.inwrte\");\n\nconst storctlRaw = flow.get(\"readback.storctl_mod_raw\");\nconst outwrteRaw = flow.get(\"readback.outwrte_raw\");\nconst inwrteRaw  = flow.get(\"readback.inwrte_raw\");\n\nconst storctlTs = flow.get(\"readback.storctl_mod_ts\") ?? 0;\nconst outwrteTs = flow.get(\"readback.outwrte_ts\") ?? 0;\nconst inwrteTs  = flow.get(\"readback.inwrte_ts\") ?? 0;\n\n\n// ======================================================\n// 5) MODUS TEXT UND FARBE\n// ======================================================\n\nlet fill = \"grey\";\nlet shape = \"ring\";\nlet modeText = \"❔ Unbekannt\";\n\nif (storctlMod === 0) {\n    fill = \"green\";\n    shape = \"dot\";\n    modeText = \"✅ Frei\";\n} else if (storctlMod === 1) {\n    fill = \"yellow\";\n    shape = \"dot\";\n    modeText = \"🟡 Ladeblock\";\n} else if (storctlMod === 2) {\n    fill = \"blue\";\n    shape = \"dot\";\n    modeText = \"🔵 Entladen\";\n} else if (storctlMod === 3) {\n    fill = \"purple\";\n    shape = \"dot\";\n    modeText = \"🟣 Entl.+Ladeblock\";\n}\n\n\n// ======================================================\n// 6) ANZEIGETEXTE FÜR OUTWRTE UND INWRTE\n// ======================================================\n\nconst outwrteText =\n    outwrte === null || outwrte === undefined\n        ? \"Entl. ?\"\n        : `Entl. ${percentTextFromWrte(outwrte)}`;\n\n// InWRte ist etwas tricky:\n// - Bei Modus 0 ist es nicht aktiv und kann alte/komische Werte enthalten.\n// - Bei Modus 1 oder 3 ist InWRte relevant.\n// - Rohwert 59536 kann signed -6000 bedeuten.\nlet inwrteText = \"Laden ?\";\n\nif (inwrte === null || inwrte === undefined) {\n    inwrteText = \"Laden ?\";\n} else if (storctlMod === 0 || storctlMod === 2) {\n    // In diesen Modi ist InWRte nicht aktiv.\n    // Trotzdem zeigen wir Diagnose, wenn ein auffälliger raw/signed Wert vorhanden ist.\n    if (inwrteRaw !== null && inwrteRaw !== undefined && inwrteRaw > 32767) {\n        inwrteText = `Laden frei`;\n    } else {\n        inwrteText = \"Laden frei\";\n    }\n} else {\n    // Modus 1 oder 3: InWRte ist aktiv relevant.\n    if (inwrte === 0) {\n        inwrteText = \"Laden 0%\";\n    } else if (inwrte > 0) {\n        inwrteText = `Laden ${percentTextFromWrte(inwrte)}`;\n    } else {\n        // negativer signed-Wert: Diagnose statt Prozent\n        inwrteText = `Laden roh ${inwrte}`;\n    }\n}\n\n\n// ======================================================\n// 7) ALTER DER WERTE\n// ======================================================\n\nconst newestTs = Math.max(storctlTs, outwrteTs, inwrteTs);\n\nconst ageSec =\n    newestTs > 0\n        ? Math.round((Date.now() - newestTs) / 1000)\n        : null;\n\nconst ageText =\n    ageSec === null\n        ? \"?s\"\n        : `${ageSec}s`;\n\n\n// ======================================================\n// 8) KOMPAKTER NODE-STATUS\n// ======================================================\n\nconst statusText =\n    `${modeText} | ${outwrteText} | ${inwrteText} | ${ageText}`;\n\nnode.status({\n    fill,\n    shape,\n    text: statusText\n});\n\n\n// ======================================================\n// 9) DEBUG-PAYLOAD AUSGEBEN\n// ======================================================\n\nmsg.payload = {\n    topic: msg.topic,\n\n    last_register: {\n        topic: msg.topic,\n        raw: rawNumber,\n        signed_int16: signedValue\n    },\n\n    readback: {\n        storctl_mod: storctlMod ?? null,\n        outwrte: outwrte ?? null,\n        inwrte: inwrte ?? null\n    },\n\n    raw: {\n        storctl_mod_raw: storctlRaw ?? null,\n        outwrte_raw: outwrteRaw ?? null,\n        inwrte_raw: inwrteRaw ?? null\n    },\n\n    percent: {\n        outwrte_percent: wrteToPercent(outwrte),\n        inwrte_percent:\n            inwrte !== null &&\n            inwrte !== undefined &&\n            inwrte >= 0\n                ? wrteToPercent(inwrte)\n                : null\n    },\n\n    status: {\n        text: statusText,\n        fill,\n        shape,\n        mode_text: modeText,\n        outwrte_text: outwrteText,\n        inwrte_text: inwrteText,\n        age_sec: ageSec\n    },\n\n    timestamps: {\n        storctl_mod_ts: storctlTs,\n        outwrte_ts: outwrteTs,\n        inwrte_ts: inwrteTs,\n        newest_age_sec: ageSec\n    },\n\n    ts: new Date().toISOString()\n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
@@ -662,21 +932,22 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 690,
-        "y": 580,
+        "x": 825,
+        "y": 940,
         "wires": [
             []
-        ]
+        ],
+        "g": "18314bc9cc35f1d1"
     },
     {
         "id": "2a8d588540a1878d",
         "type": "http request",
         "z": "6301e7be3ca6daa7",
-        "name": "",
+        "name": "Shelly Planer",
         "method": "GET",
         "ret": "txt",
         "paytoqs": "ignore",
-        "url": "http://10.0.0.105/script/1/planer?status=1",
+        "url": "",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -684,35 +955,37 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 290,
-        "y": 120,
+        "x": 590,
+        "y": 450,
         "wires": [
             [
                 "c8358783a0ed753a"
             ]
-        ]
+        ],
+        "g": "559a0358e0d982d7"
     },
     {
         "id": "c8358783a0ed753a",
         "type": "json",
         "z": "6301e7be3ca6daa7",
-        "name": "",
+        "name": "JSON",
         "property": "payload",
         "action": "",
         "pretty": false,
-        "x": 430,
-        "y": 120,
+        "x": 765,
+        "y": 450,
         "wires": [
             [
                 "3164304fbaee5495"
             ]
-        ]
+        ],
+        "g": "559a0358e0d982d7"
     },
     {
         "id": "3164304fbaee5495",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Steuerung Belüftung aktiv",
+        "name": "Heubelüftung → Sperre",
         "func": "// ======================================================\n// NODE: Heubelüftung abfragen\n// Zweck:\n// - JSON-Status vom Shelly-Skript auswerten\n// - Haken \"Automatik AKTIV\" abfragen\n// - Daraus einen allgemeinen Eingang \"Entladen Sperren\" erzeugen\n//\n// Erwarteter Shelly-Status:\n// {\n//   \"timer_active\": true/false,\n//   \"switch_output\": true/false,\n//   \"source\": \"shelly_heubelueftung\"\n// }\n//\n// Logik:\n// timer_active = true  -> Entladen sperren\n// timer_active = false -> Entladen freigeben\n// ======================================================\n\nlet p = msg.payload;\n\n// Falls HTTP Request / JSON Node doch einen String liefert\nif (typeof p === \"string\") {\n    try {\n        p = JSON.parse(p);\n    } catch (e) {\n        node.error(\"Shelly JSON konnte nicht gelesen werden\", msg);\n\n        node.status({\n            fill: \"red\",\n            shape: \"ring\",\n            text: \"JSON Fehler\"\n        });\n\n        return null;\n    }\n}\n\n// Sicherheitscheck\nif (!p || typeof p !== \"object\") {\n    node.error(\"Shelly Payload fehlt oder ist kein Objekt\", msg);\n\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Payload fehlt\"\n    });\n\n    return null;\n}\n\n// Shelly-Haken auswerten\nconst timerActive = p.timer_active === true;\n\n// Aktueller Relaiszustand, nur zur Anzeige/Debug\nconst switchOutput = p.switch_output === true;\n\n// ======================================================\n// Deine gewünschte Logik:\n// Haken \"Automatik AKTIV\" gesetzt\n// = Heubelüftung hat Vorrang\n// = Verto-Entladung sperren\n// ======================================================\n\nconst entladenSperren = timerActive;\n\n// ======================================================\n// Allgemeiner Ausgang für Sammel-Node \"Entladen-Sperre sammeln\"\n// Später können andere Nodes das gleiche Format senden:\n// - Wallbox\n// - Heizstab\n// - großer Verbraucher\n// - sonstige Sperrbedingungen\n// ======================================================\n\nmsg.topic = \"entladen_sperre\";\nmsg.lock_source = \"shelly_heubelueftung\";\nmsg.entladen_sperren = entladenSperren;\n\nmsg.payload = {\n    source: \"shelly_heubelueftung\",\n\n    // Allgemeiner Sperrwert\n    entladen_sperren: entladenSperren,\n\n    // Shelly-Rohwerte zur Kontrolle\n    shelly_timer_active: timerActive,\n    shelly_switch_output: switchOutput,\n\n    // Erklärung für Debug\n    reason: entladenSperren\n        ? \"Shelly Automatik AKTIV -> Entladen sperren\"\n        : \"Shelly Automatik INAKTIV -> Entladen freigeben\"\n};\n\n// Node-Status\nnode.status({\n    fill: entladenSperren ? \"red\" : \"green\",\n    shape: entladenSperren ? \"ring\" : \"dot\",\n    text: entladenSperren\n        ? \"Entladen gesperrt\"\n        : \"Entladen frei\"\n});\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
@@ -720,19 +993,20 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 610,
-        "y": 120,
+        "x": 970,
+        "y": 450,
         "wires": [
             [
                 "b68362bf68f6153e"
             ]
-        ]
+        ],
+        "g": "559a0358e0d982d7"
     },
     {
         "id": "b68362bf68f6153e",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Entlade Sperren Sammeln",
+        "name": "Entladesperren sammeln",
         "func": "// ======================================================\n// NODE: Entladesperren sammeln\n// Zweck:\n// - Allgemeine Entladesperren mehrerer Quellen sammeln\n// - Wenn mindestens eine Quelle aktiv ist:\n//   flow.verto_discharge_lock = true\n//\n// Erwartetes Eingangsformat:\n// msg.topic = \"entladen_sperre\"\n// msg.lock_source = \"shelly_heubelueftung\"\n// msg.entladen_sperren = true/false\n//\n// Oder alternativ:\n// msg.payload.entladen_sperren = true/false\n// msg.payload.source = \"shelly_heubelueftung\"\n// ======================================================\n\n// Nur Nachrichten für die Entladesperre verarbeiten\nif (msg.topic !== \"entladen_sperre\") {\n    node.status({\n        fill: \"grey\",\n        shape: \"ring\",\n        text: \"ignoriert: falsches topic\"\n    });\n    return null;\n}\n\n// Quelle bestimmen\nconst source =\n    msg.lock_source ||\n    msg.payload?.source ||\n    \"unknown_source\";\n\n// Sperrwert auswerten\nconst active =\n    msg.entladen_sperren === true ||\n    msg.payload?.entladen_sperren === true;\n\n// Bestehende Sperren laden\nlet locks = flow.get(\"verto_discharge_locks\") || {};\n\n// Diese Quelle aktualisieren\nlocks[source] = {\n    active: active,\n    updated: Date.now(),\n    reason: msg.payload?.reason || \"\",\n    last_payload: msg.payload || null\n};\n\n// Sperren speichern\nflow.set(\"verto_discharge_locks\", locks);\n\n// Gesamtstatus berechnen\n// Sobald mindestens eine Quelle aktiv ist, ist Entladen gesperrt.\nlet anyActive = false;\nlet activeSources = [];\n\nfor (let key in locks) {\n    if (locks[key] && locks[key].active === true) {\n        anyActive = true;\n        activeSources.push(key);\n    }\n}\n\n// Gesamtstatus im Flow speichern\nflow.set(\"verto_discharge_lock\", anyActive);\nflow.set(\"verto_discharge_lock_sources\", activeSources);\nflow.set(\"verto_discharge_lock_updated\", Date.now());\n\n// Ausgabe für Debug / weitere Anzeige\nmsg.payload = {\n    entladen_sperren: anyActive,\n    active_sources: activeSources,\n    all_locks: locks,\n    reason: anyActive\n        ? \"Entladen gesperrt durch: \" + activeSources.join(\", \")\n        : \"Keine aktive Entladesperre\"\n};\n\n// Node Status\nnode.status({\n    fill: anyActive ? \"red\" : \"green\",\n    shape: anyActive ? \"ring\" : \"dot\",\n    text: anyActive\n        ? \"GESPERRT: \" + activeSources.join(\", \")\n        : \"Entladen frei\"\n});\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
@@ -740,11 +1014,12 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 880,
-        "y": 120,
+        "x": 1235,
+        "y": 450,
         "wires": [
             []
-        ]
+        ],
+        "g": "559a0358e0d982d7"
     },
     {
         "id": "135dceee5a6e573e",
@@ -753,7 +1028,7 @@
         "group": "f9be3f44bac5f587",
         "page": "",
         "ui": "",
-        "name": "Nodred Gui",
+        "name": "Dashboard",
         "order": 1,
         "width": "12",
         "height": "23",
@@ -764,21 +1039,22 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 670,
-        "y": 360,
+        "x": 650,
+        "y": 1200,
         "wires": [
             [
                 "6db2bf493a5dc1c6",
-                "08b89f7479d7891c",
+                "ebe99c241579c6a1",
                 "0fcd153721565e25"
             ]
-        ]
+        ],
+        "g": "19391d7d50fb664c"
     },
     {
         "id": "775809b8e60b2849",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Forcast speichern GUi",
+        "name": "Prognose für GUI",
         "func": "// ======================================================\n// NODE: Forecast speichern GUI\n// Zweck:\n// - Nimmt bevorzugt den bereits ausgewerteten Forecast_V6 Output\n// - Fallback: kann weiterhin rohe watt_hours_period Daten auswerten\n// - Speichert forecast_today_kwh und forecast_tomorrow_kwh für das GUI\n// ======================================================\n\nfunction localDateKey(date) {\n    return new Intl.DateTimeFormat(\"sv-SE\", {\n        timeZone: \"Europe/Vienna\",\n        year: \"numeric\",\n        month: \"2-digit\",\n        day: \"2-digit\"\n    }).format(date);\n}\n\nfunction addDays(date, days) {\n    const d = new Date(date);\n    d.setDate(d.getDate() + days);\n    return d;\n}\n\nfunction num(...values) {\n    for (const v of values) {\n        const n = Number(v);\n        if (Number.isFinite(n)) return n;\n    }\n    return null;\n}\n\nfunction dateFromKey(key) {\n    if (!key) return null;\n\n    const s = String(key);\n\n    const m = s.match(/^(\\d{4}-\\d{2}-\\d{2})/);\n    if (m) return m[1];\n\n    const d = new Date(s);\n    if (!isNaN(d.getTime())) return localDateKey(d);\n\n    return null;\n}\n\nconst p = msg.payload || {};\n\nconst todayKey = localDateKey(new Date());\nconst tomorrowKey = localDateKey(addDays(new Date(), 1));\n\nlet todayKwh = null;\nlet tomorrowKwh = null;\nlet todayDate = todayKey;\nlet tomorrowDate = tomorrowKey;\nlet dailyKwh = {};\n\n\n// ======================================================\n// 1) BEVORZUGT: Forecast_V6 liefert bereits fertige Werte\n// ======================================================\n\ntodayKwh = num(\n    p.forecast?.today?.kwh,\n    p.today?.kwh,\n    p.forecast_today_kwh,\n    p.today_kwh,\n    p.kwh\n);\n\ntomorrowKwh = num(\n    p.forecast?.tomorrow?.kwh,\n    p.tomorrow?.kwh,\n    p.forecast_tomorrow_kwh,\n    p.tomorrow_kwh\n);\n\ntodayDate =\n    p.forecast?.today?.date ??\n    p.today?.date ??\n    p.today_date ??\n    todayKey;\n\ntomorrowDate =\n    p.forecast?.tomorrow?.date ??\n    p.tomorrow?.date ??\n    p.tomorrow_date ??\n    tomorrowKey;\n\nif (todayKwh !== null) {\n    dailyKwh[todayDate] = todayKwh;\n}\n\nif (tomorrowKwh !== null) {\n    dailyKwh[tomorrowDate] = tomorrowKwh;\n}\n\n\n// ======================================================\n// 2) FALLBACK: Rohe watt_hours_period Daten auswerten\n//    Nur wenn oben keine fertigen Werte gefunden wurden\n// ======================================================\n\nif (todayKwh === null && tomorrowKwh === null) {\n    const period =\n        p.result?.watt_hours_period ??\n        p.watt_hours_period ??\n        p.result?.watthours_period ??\n        null;\n\n    const sumsWh = {};\n\n    if (period && typeof period === \"object\") {\n        if (Array.isArray(period)) {\n            for (const row of period) {\n                let time;\n                let wh;\n\n                if (Array.isArray(row)) {\n                    time = row[0];\n                    wh = Number(row[1]);\n                } else if (row && typeof row === \"object\") {\n                    time =\n                        row.time ??\n                        row.timestamp ??\n                        row.datetime ??\n                        row.period_end ??\n                        row.period;\n\n                    wh = Number(\n                        row.watt_hours ??\n                        row.wh ??\n                        row.value ??\n                        row.watt_hours_period\n                    );\n                }\n\n                const day = dateFromKey(time);\n\n                if (day && Number.isFinite(wh)) {\n                    sumsWh[day] = (sumsWh[day] || 0) + wh;\n                }\n            }\n        } else {\n            for (const [key, value] of Object.entries(period)) {\n                const day = dateFromKey(key);\n                const wh = Number(value);\n\n                if (day && Number.isFinite(wh)) {\n                    sumsWh[day] = (sumsWh[day] || 0) + wh;\n                }\n            }\n        }\n    }\n\n    dailyKwh = Object.fromEntries(\n        Object.entries(sumsWh).map(([k, v]) => [k, v / 1000])\n    );\n\n    todayKwh = dailyKwh[todayKey] ?? 0;\n    tomorrowKwh = dailyKwh[tomorrowKey] ?? 0;\n    todayDate = todayKey;\n    tomorrowDate = tomorrowKey;\n}\n\n\n// ======================================================\n// 3) Finale Werte speichern\n// ======================================================\n\nconst forecast = {\n    updated_at: new Date().toISOString(),\n\n    today_date: todayDate,\n    tomorrow_date: tomorrowDate,\n\n    forecast_today_kwh: todayKwh ?? 0,\n    forecast_tomorrow_kwh: tomorrowKwh ?? 0,\n\n    daily_kwh: dailyKwh,\n\n    source: p.source ?? \"unknown\",\n    used_fallback: !!p.used_fallback\n};\n\nflow.set(\"verto_gui_forecast\", forecast);\n\nnode.status({\n    fill: \"blue\",\n    shape: \"dot\",\n    text: `Heute ${forecast.forecast_today_kwh.toFixed(1)} kWh | Morgen ${forecast.forecast_tomorrow_kwh.toFixed(1)} kWh`\n});\n\nmsg.payload = forecast;\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
@@ -786,17 +1062,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 800,
-        "y": 60,
+        "x": 1255,
+        "y": 270,
         "wires": [
             []
-        ]
+        ],
+        "g": "1dcc23f7b69e8173"
     },
     {
         "id": "dde43884657190d3",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Daten speichern GUI",
+        "name": "Livewerte für GUI",
         "func": "/// ======================================================\n// NODE: GUI Livewerte speichern V7.4\n//\n// Zweck:\n// - Livewerte für das Dashboard zwischenspeichern\n// - robust gegen unterschiedliche Feldnamen / Verschachtelung\n// - bestehende gültige Werte nicht mit null überschreiben\n// ======================================================\n\nconst FIELD_ALIASES = {\n    soc_percent: [\n        \"soc_percent\", \"battery_soc\", \"soc\"\n    ],\n    house_load_w: [\n        \"house_load_w\", \"house_load\", \"load_power_w\", \"load_w\",\n        \"verbrauch_w\", \"hausverbrauch_w\"\n    ],\n    pv_power_w: [\n        \"pv_power_w\", \"pv_power\", \"solar_power_w\", \"solar_power\",\n        \"p_pv\", \"pac\", \"pvpower\"\n    ],\n    grid_power_w: [\n        \"grid_power_w\", \"grid_power\", \"netz_w\", \"netzbezug_w\",\n        \"p_grid\", \"grid_w\"\n    ],\n    battery_power_w: [\n        \"battery_power_w\", \"battery_power\", \"batterie_w\",\n        \"p_battery\"\n    ]\n};\n\nconst aliasSets = Object.fromEntries(\n    Object.entries(FIELD_ALIASES).map(([name, aliases]) => [\n        name,\n        new Set(aliases.map(v => v.toLowerCase()))\n    ])\n);\n\nfunction findNumber(obj, aliases, depth = 0) {\n    if (!obj || typeof obj !== \"object\" || depth > 5) return null;\n\n    for (const [key, value] of Object.entries(obj)) {\n        if (!aliases.has(String(key).toLowerCase())) continue;\n\n        const n = Number(value);\n        if (Number.isFinite(n)) return n;\n    }\n\n    for (const value of Object.values(obj)) {\n        if (value && typeof value === \"object\") {\n            const found = findNumber(value, aliases, depth + 1);\n            if (found !== null) return found;\n        }\n    }\n\n    return null;\n}\n\nconst root = {\n    ...msg,\n    payload: msg.payload\n};\n\nconst update = {\n    updated_at: new Date().toISOString()\n};\n\nfor (const [field, aliases] of Object.entries(aliasSets)) {\n    const value = findNumber(root, aliases);\n    if (value !== null) update[field] = value;\n}\n\nconst live = {\n    ...(flow.get(\"verto_gui_live\") || {}),\n    ...update\n};\n\nflow.set(\"verto_gui_live\", live);\n\nnode.status({\n    fill: \"green\",\n    shape: \"dot\",\n    text: `SOC ${live.soc_percent ?? \"?\"}% | Haus ${live.house_load_w ?? \"?\"} W`\n});\n\nmsg.payload = live;\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
@@ -804,17 +1081,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1100,
-        "y": 240,
+        "x": 1245,
+        "y": 140,
         "wires": [
             []
-        ]
+        ],
+        "g": "d7616d62d4932c6b"
     },
     {
         "id": "749ddfd6017af057",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "GUI Status bauen",
+        "name": "GUI-Status bauen",
         "func": "// ======================================================\n// NODE: GUI Status bauen V7.4\n//\n// Aufgabe:\n// - KEINE Strategielogik\n// - nur Strategie_V7.4 + gespeicherte Livewerte für die GUI\n//   in ein kompaktes Dashboard-Payload umformen\n// ======================================================\n\nfunction num(...values) {\n    for (const value of values) {\n        if (value === null || value === undefined || value === \"\") continue;\n\n        const n = Number(value);\n        if (Number.isFinite(n)) return n;\n    }\n\n    return null;\n}\n\nfunction text(...values) {\n    for (const value of values) {\n        if (\n            value !== undefined &&\n            value !== null &&\n            String(value).trim() !== \"\"\n        ) {\n            return String(value);\n        }\n    }\n\n    return null;\n}\n\nfunction prettyClass(value) {\n    const map = {\n        VERY_BAD: \"SEHR SCHLECHT\",\n        WEAK: \"SCHWACH\",\n        MEDIUM: \"MITTEL\",\n        GOOD: \"GUT\",\n        VERY_GOOD: \"SEHR GUT\",\n        OFF: \"AUS\",\n        UNKNOWN: \"—\"\n    };\n\n    const key = String(value || \"\").toUpperCase();\n    return map[key] || key || \"—\";\n}\n\nfunction prettyReason(raw) {\n    const r = String(raw || \"\").trim();\n\n    const map = {\n        dynamic_discharge_to_target_by_discharge_end:\n            \"Strategische Entladung aktiv. Der Ziel-SOC soll bis zum Entladeende erreicht werden.\",\n\n        target_soc_reached_stop_discharge:\n            \"Ziel-SOC erreicht. Die strategische Entladung ist beendet.\",\n\n        outside_discharge_window:\n            \"Außerhalb des strategischen Entladefensters.\",\n\n        strategic_discharge_disabled:\n            \"Strategische Morgenentladung ist deaktiviert.\",\n\n        forecast_invalid_no_strategic_discharge:\n            \"Keine gültige Prognose für heute und morgen. Keine strategische Entladung.\",\n\n        soc_missing_no_strategic_discharge:\n            \"Kein gültiger Batterie-SOC. Keine strategische Entladung.\",\n\n        sunrise_charge_block_active:\n            \"Aufladen ist im Morgenfenster blockiert. Entladen regelt Fronius.\",\n\n        outside_charge_block_window:\n            \"Außerhalb des Ladeblock-Zeitfensters.\",\n\n        charge_block_disabled:\n            \"Aufladeblockierung ist deaktiviert.\",\n\n        soc_below_target_charge_to_target_allowed:\n            \"SOC liegt unter dem Ziel-SOC. Laden bis zum Ziel bleibt erlaubt.\",\n\n        today_forecast_too_low_no_charge_block:\n            \"Heutige PV-Prognose ist zu niedrig für den Ladeblock.\",\n\n        very_good_forecast:\n            \"Sehr gute heutige Prognose: Ladeleistung stark begrenzt.\",\n\n        good_forecast:\n            \"Gute heutige Prognose: Ladeleistung begrenzt.\",\n\n        medium_forecast:\n            \"Mittlere heutige Prognose: Ladeleistung moderat begrenzt.\",\n\n        weak_forecast:\n            \"Schwache heutige Prognose: volle Ladeleistung erlaubt.\",\n\n        charge_limit_disabled:\n            \"Prognoseabhängige Ladebegrenzung ist deaktiviert.\",\n\n        forecast_invalid_charge_unlimited:\n            \"Keine gültige heutige Prognose. Laden bleibt unbegrenzt.\",\n\n        entladen_sperren_aktiv:\n            \"Entladesperre aktiv. Verto übernimmt die Speicherregelung.\",\n\n        external_discharge_lock:\n            \"Entladesperre aktiv. Verto übernimmt die Speicherregelung.\",\n\n        verto_free_self_consumption_control:\n            \"Fronius regelt den Eigenverbrauch selbst.\",\n\n        charge_block_only_fronius_controls_discharge:\n            \"Aufladen blockiert. Entladen regelt Fronius.\",\n\n        forecast_charge_limit_only_fronius_controls_discharge:\n            \"Ladeleistung prognoseabhängig begrenzt. Entladen regelt Fronius.\"\n    };\n\n    return map[r] || (\n        r\n            ? r.replaceAll(\"_\", \" \")\n            : \"Strategiedaten empfangen.\"\n    );\n}\n\nconst src =\n    msg.payload &&\n    typeof msg.payload === \"object\"\n        ? msg.payload\n        : {};\n\nflow.set(\"verto_last_strategy\", src);\n\nconst forecast = flow.get(\"verto_gui_forecast\") || {};\nconst live = flow.get(\"verto_gui_live\") || {};\nconst config = flow.get(\"strategy_v7_config\") || null;\n\nconst inputs = src.inputs || {};\nconst reserve = src.reserve || {};\nconst chargeLimit = src.charge_limit || {};\nconst chargeBlock = src.charge_block || {};\nconst strategic = src.strategic_discharge || {};\nconst dischargeCmd = src.discharge_command || {};\nconst time = src.time || {};\nconst modbus = src.modbus_proposal || {};\nconst externalLock = src.external_discharge_lock || {};\n\n// ------------------------------------------------------\n// Sperren\n// ------------------------------------------------------\n\nconst manualLock =\n    flow.get(\"manual_discharge_lock\") === true;\n\nconst externalLocked =\n    externalLock.active === true ||\n    flow.get(\"verto_discharge_lock\") === true;\n\nconst dischargeLocked =\n    manualLock ||\n    externalLocked;\n\n// ------------------------------------------------------\n// Strategieanzeige\n// ------------------------------------------------------\n\nconst targetSoc =\n    num(\n        reserve.target_soc,\n        flow.get(\"strategy_v7_target_soc\")\n    );\n\nconst reserveClass =\n    text(\n        reserve.reserve_class,\n        flow.get(\"strategy_v7_reserve_class\")\n    );\n\nconst chargeClass =\n    text(\n        chargeLimit.class,\n        flow.get(\"strategy_v7_charge_limit_class\")\n    );\n\nconst chargeLimitPercent =\n    num(\n        chargeLimit.max_charge_percent\n    );\n\nconst commandedDischargeW =\n    num(\n        dischargeCmd.total_battery_discharge_w,\n        strategic.required_target_discharge_w\n    );\n\nlet strategyName;\n\nif (dischargeLocked) {\n    strategyName = \"Entladen gesperrt | Verto frei\";\n}\nelse if (strategic.allowed === true) {\n    strategyName =\n        commandedDischargeW !== null\n            ? `Strategisch entladen | ${Math.round(commandedDischargeW)} W`\n            : \"Strategisch entladen\";\n}\nelse if (chargeBlock.allowed === true) {\n    strategyName = \"Aufladen blockiert | Fronius entlädt\";\n}\nelse if (chargeLimit.active === true) {\n    strategyName =\n        chargeLimitPercent !== null\n            ? `Fronius Eigenverbrauch | Laden max. ${chargeLimitPercent}%`\n            : \"Fronius Eigenverbrauch | Laden begrenzt\";\n}\nelse {\n    strategyName = \"Fronius Eigenverbrauch\";\n}\n\n// Aktive Ursache statt irgendeiner inaktiven Nebenbedingung anzeigen.\nlet rawReason;\n\nif (dischargeLocked) {\n    rawReason = \"entladen_sperren_aktiv\";\n}\nelse if (strategic.allowed === true) {\n    rawReason = strategic.reason;\n}\nelse if (chargeBlock.allowed === true) {\n    rawReason = chargeBlock.reason;\n}\nelse if (chargeLimit.active === true) {\n    rawReason = chargeLimit.reason;\n}\nelse if (strategic.reason === \"target_soc_reached_stop_discharge\") {\n    rawReason = strategic.reason;\n}\nelse {\n    rawReason =\n        modbus.mode_reason ||\n        strategic.reason ||\n        chargeBlock.reason ||\n        chargeLimit.reason;\n}\n\nconst reason = prettyReason(rawReason);\n\nconst sunriseSource =\n    text(\n        time.sunrise_source,\n        flow.get(\"strategy_v7_sunrise_source\")\n    ) ||\n    \"fallback\";\n\n// ------------------------------------------------------\n// GUI Payload\n// ------------------------------------------------------\n\nmsg.payload = {\n    updated_at:\n        new Date().toLocaleString(\"de-AT\", {\n            timeZone: \"Europe/Vienna\",\n            hour12: false\n        }),\n\n    strategy_config: config,\n\n    sunrise: text(time.sunrise),\n    sunrise_minutes:\n        num(\n            time.sunrise_minutes,\n            flow.get(\"strategy_v7_sunrise_min\")\n        ),\n    sunrise_source: sunriseSource,\n\n    discharge_start: text(time.discharge_start),\n    discharge_end: text(time.discharge_end),\n    discharge_window: text(time.discharge_window),\n\n    charge_block_start:\n        text(\n            time.charge_block_start,\n            chargeBlock.start\n        ),\n    charge_block_end:\n        text(\n            time.charge_block_end,\n            chargeBlock.until\n        ),\n    charge_block_window:\n        text(time.charge_block_window),\n\n    forecast_date:\n        inputs.forecast_today_date ??\n        forecast.today_date ??\n        \"heute\",\n\n    forecast_today_kwh:\n        num(\n            inputs.forecast_today_kwh,\n            forecast.forecast_today_kwh\n        ),\n\n    forecast_tomorrow_kwh:\n        num(\n            inputs.forecast_tomorrow_kwh,\n            forecast.forecast_tomorrow_kwh\n        ),\n\n    strategy_name: strategyName,\n    strategy_reason: reason,\n\n    // \"strategy_class\" bleibt nur als Alias für ältere Anzeige.\n    strategy_class: chargeClass,\n    charge_limit_class: chargeClass,\n    charge_limit_class_label: prettyClass(chargeClass),\n\n    reserve_class: reserveClass,\n    reserve_class_label: prettyClass(reserveClass),\n\n    reserve_today_class:\n        text(reserve.today_class),\n    reserve_today_class_label:\n        prettyClass(reserve.today_class),\n\n    reserve_tomorrow_class:\n        text(reserve.tomorrow_class),\n    reserve_tomorrow_class_label:\n        prettyClass(reserve.tomorrow_class),\n\n    target_soc_percent: targetSoc,\n\n    charge_limit_percent:\n        chargeLimitPercent,\n\n    charge_limit_active:\n        chargeLimit.active === true,\n\n    soc_percent:\n        num(\n            inputs.soc_percent,\n            live.soc_percent\n        ),\n\n    pv_power_w:\n        num(\n            inputs.pv_power_w,\n            live.pv_power_w\n        ),\n\n    house_load_w:\n        num(\n            inputs.house_load_w,\n            live.house_load_w\n        ),\n\n    grid_power_w:\n        num(\n            inputs.grid_power_w,\n            live.grid_power_w\n        ),\n\n    // echter Messwert, soweit vorhanden\n    battery_power_w:\n        num(\n            inputs.battery_power_w,\n            live.battery_power_w\n        ),\n\n    // strategische Vorgabe, NICHT Messwert\n    battery_discharge_command_w:\n        commandedDischargeW,\n\n    strategic_discharge_active:\n        strategic.allowed === true,\n\n    strategic_discharge_reason:\n        text(strategic.reason),\n\n    calculated_discharge_w:\n        num(strategic.calculated_discharge_w),\n\n    required_discharge_w:\n        num(strategic.required_target_discharge_w),\n\n    hours_until_discharge_end:\n        num(strategic.hours_until_discharge_end),\n\n    charge_block_active:\n        chargeBlock.allowed === true,\n\n    charge_block_reason:\n        text(chargeBlock.reason),\n\n    charge_block_duration_min:\n        num(\n            chargeBlock.duration_min,\n            config?.charge_block?.duration_min\n        ),\n\n    storctl_mod:\n        num(\n            modbus.storctl_mod,\n            src.write?.storctl_mod,\n            flow.get(\"storctl_mod\")\n        ),\n\n    outwrte:\n        num(\n            modbus.outwrte,\n            src.write?.outwrte,\n            flow.get(\"outwrte\")\n        ),\n\n    inwrte:\n        num(\n            modbus.inwrte,\n            src.write?.inwrte,\n            flow.get(\"inwrte\")\n        ),\n\n    modbus_mode_reason:\n        text(modbus.mode_reason),\n\n    discharge_locked:\n        dischargeLocked,\n\n    discharge_lock_reason:\n        manualLock\n            ? \"Entladen manuell über GUI gesperrt\"\n            : externalLocked\n                ? (\n                    Array.isArray(externalLock.sources) &&\n                    externalLock.sources.length\n                        ? externalLock.sources.join(\", \")\n                        : \"Externe Entladesperre aktiv\"\n                )\n                : \"Keine Entladesperre aktiv\"\n};\n\nnode.status({\n    fill:\n        dischargeLocked\n            ? \"red\"\n            : \"green\",\n\n    shape: \"dot\",\n\n    text:\n        strategyName +\n        \" | SOC \" +\n        (msg.payload.soc_percent ?? \"?\") +\n        \"%\"\n});\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
@@ -822,19 +1100,20 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 430,
-        "y": 360,
+        "x": 455,
+        "y": 1200,
         "wires": [
             [
                 "135dceee5a6e573e"
             ]
-        ]
+        ],
+        "g": "19391d7d50fb664c"
     },
     {
         "id": "6db2bf493a5dc1c6",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "GUI Befehl auswerten",
+        "name": "GUI-Befehl auswerten",
         "func": "// ======================================================\n// NODE: GUI Befehl auswerten\n// Zweck:\n// - Button aus Dashboard auswerten\n// - Manuelle Entladesperre speichern\n// - Nachricht an Entladesperren-Sammler schicken\n// ======================================================\n\nconst p = msg.payload || {};\nconst cmd = p.cmd;\n\nif (cmd === \"set_discharge_lock\") {\n    const active = !!p.value;\n\n    // Nur noch zur Anzeige/Kompatibilität – die Steuerung\n    // läuft über den Entladesperren-Sammler.\n    flow.set(\"manual_discharge_lock\", active);\n\n    node.status({\n        fill: active ? \"red\" : \"green\",\n        shape: \"dot\",\n        text: active ? \"GUI Sperre aktiv\" : \"GUI Sperre aus\"\n    });\n\n    // Format des Entladesperren-Sammlers\n    // (gleich wie beim Shelly / Heubelüftung)\n    return {\n        topic: \"entladen_sperre\",\n        lock_source: \"gui_manual\",\n        entladen_sperren: active,\n        payload: {\n            source: \"gui_manual\",\n            entladen_sperren: active,\n            reason: active\n                ? \"Entladen manuell über Web-GUI gesperrt\"\n                : \"Manuelle Web-GUI-Sperre aufgehoben\",\n            ts: new Date().toISOString()\n        }\n    };\n}\n\nif (cmd === \"save_params\") {\n    const old = flow.get(\"verto_strategy_params\") || {};\n    const incoming = p.params || {};\n\n    const next = { ...old };\n\n    for (const [key, value] of Object.entries(incoming)) {\n        const n = Number(value);\n        if (Number.isFinite(n)) {\n            next[key] = n;\n        }\n    }\n\n    flow.set(\"verto_strategy_params\", next);\n\n    node.status({\n        fill: \"blue\",\n        shape: \"dot\",\n        text: \"Parameter gespeichert\"\n    });\n\n    return null;\n}\n\nreturn null;",
         "outputs": 1,
         "timeout": 0,
@@ -842,19 +1121,20 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 900,
-        "y": 360,
+        "x": 865,
+        "y": 1200,
         "wires": [
             [
-                "b68362bf68f6153e"
+                "4d9a58dd1f29cdd5"
             ]
-        ]
+        ],
+        "g": "19391d7d50fb664c"
     },
     {
         "id": "4c16a54dc634cc11",
         "type": "inject",
         "z": "6301e7be3ca6daa7",
-        "name": "V7 Config Init",
+        "name": "Start",
         "props": [
             {
                 "p": "payload"
@@ -871,19 +1151,20 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 120,
-        "y": 460,
+        "x": 190,
+        "y": 740,
         "wires": [
             [
                 "9d55c440bd781e4c"
             ]
-        ]
+        ],
+        "g": "b886f3f9b6614672"
     },
     {
         "id": "9d55c440bd781e4c",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Strategie_V7_Config_Init",
+        "name": "Config laden",
         "func": "// ======================================================\n// NODE: Strategie_V7_Config_Init V7.4\n//\n// Zweck:\n// - lädt beim Start zuerst die dauerhaft gespeicherte Config\n// - fällt sonst auf RAM bzw. DEFAULT_CONFIG zurück\n// - migriert ältere V7.x-Felder\n// - schreibt beim Start NUR in RAM\n//\n// Persistenter Store:\n//   \"persistent\" = localfilesystem aus settings.js\n//\n// Wichtig:\n// - dauerhaft geschrieben wird ausschließlich im\n//   Strategie_V7_Config_Update beim GUI-Speicherbutton\n// ======================================================\n\nconst CONFIG_KEY = \"strategy_v7_config\";\nconst PERSISTENT_STORE = \"persistent\";\n\nconst DEFAULT_CONFIG = {\n    version: 7.4,\n\n    location: {\n        latitude: 48.25,\n        longitude: 13.04\n    },\n\n    battery: {\n        capacity_kwh: 16.6,\n        power_ref_w: 15600\n    },\n\n    discharge: {\n        enabled: true,\n        sunrise_offset_min: 120,\n        sunrise_end_offset_min: 0,\n        max_power_w: 6000,\n\n        // Nur während strategischer Zwangsentladung:\n        // Entladevorgabe mindestens Hauslast + dieser Zuschlag.\n        house_load_margin_w: 200\n    },\n\n    reserve: {\n        min_soc_absolute: 10,\n\n        very_bad_below_kwh: 15,\n        target_soc_very_bad: 80,\n\n        weak_below_kwh: 30,\n        target_soc_weak: 50,\n\n        medium_below_kwh: 45,\n        target_soc_medium: 20,\n\n        target_soc_good: 10\n    },\n\n    charge_block: {\n        enabled: true,\n        duration_min: 270,\n        min_today_kwh: 40\n    },\n\n    charge_limit: {\n        enabled: true,\n\n        very_good_today_min_kwh: 60,\n        very_good_percent: 25,\n\n        good_today_min_kwh: 45,\n        good_percent: 35,\n\n        medium_today_min_kwh: 40,\n        medium_percent: 60,\n\n        weak_percent: 100\n    }\n};\n\nfunction isObject(value) {\n    return value !== null &&\n        typeof value === \"object\" &&\n        !Array.isArray(value);\n}\n\nfunction clone(value) {\n    return JSON.parse(JSON.stringify(value));\n}\n\nfunction finite(value) {\n    const n = Number(value);\n    return Number.isFinite(n) ? n : null;\n}\n\n// Übernimmt ausschließlich Felder, die im aktuellen Schema existieren.\n// Alte / unbekannte Felder verschwinden dadurch automatisch.\nfunction mergeSchema(defaults, existing) {\n    if (!isObject(defaults)) {\n        return existing !== undefined ? existing : defaults;\n    }\n\n    const result = {};\n\n    for (const key of Object.keys(defaults)) {\n        const d = defaults[key];\n        const hasExisting =\n            isObject(existing) &&\n            Object.prototype.hasOwnProperty.call(existing, key);\n\n        const e = hasExisting ? existing[key] : undefined;\n\n        result[key] = isObject(d)\n            ? mergeSchema(d, e)\n            : (e !== undefined ? e : d);\n    }\n\n    return result;\n}\n\n// ------------------------------------------------------\n// 1) Quelle wählen: persistent > RAM > Defaults\n// ------------------------------------------------------\n\nconst persistentConfig = flow.get(CONFIG_KEY, PERSISTENT_STORE);\nconst memoryConfig = flow.get(CONFIG_KEY);\n\nlet sourceName = \"defaults\";\nlet old = {};\n\nif (isObject(persistentConfig)) {\n    old = clone(persistentConfig);\n    sourceName = \"persistent\";\n}\nelse if (isObject(memoryConfig)) {\n    old = clone(memoryConfig);\n    sourceName = \"memory\";\n}\n\n// ------------------------------------------------------\n// 2) Migration älterer Versionen\n// ------------------------------------------------------\n\nif (!isObject(old.discharge)) old.discharge = {};\nif (!isObject(old.reserve)) old.reserve = {};\nif (!isObject(old.charge_block)) old.charge_block = {};\nif (!isObject(old.charge_limit)) old.charge_limit = {};\n\n// Alte V6/V7-Reservebezeichnungen -> aktuelles Schema\nif (old.reserve.very_bad_below_kwh === undefined) {\n    old.reserve.very_bad_below_kwh =\n        finite(old.reserve.tomorrow_bad_below_kwh) ??\n        DEFAULT_CONFIG.reserve.very_bad_below_kwh;\n}\n\nif (old.reserve.target_soc_very_bad === undefined) {\n    old.reserve.target_soc_very_bad =\n        finite(old.reserve.target_soc_bad) ??\n        DEFAULT_CONFIG.reserve.target_soc_very_bad;\n}\n\nif (old.reserve.weak_below_kwh === undefined) {\n    old.reserve.weak_below_kwh =\n        finite(old.reserve.tomorrow_weak_below_kwh) ??\n        DEFAULT_CONFIG.reserve.weak_below_kwh;\n}\n\nif (old.reserve.medium_below_kwh === undefined) {\n    old.reserve.medium_below_kwh =\n        finite(old.reserve.tomorrow_medium_below_kwh) ??\n        DEFAULT_CONFIG.reserve.medium_below_kwh;\n}\n\n// Alte Hauslast-Konfiguration:\n// Nur die tatsächlich noch sinnvolle Regelreserve übernehmen.\nif (old.discharge.house_load_margin_w === undefined) {\n    old.discharge.house_load_margin_w =\n        finite(old.house_load?.export_margin_w) ??\n        DEFAULT_CONFIG.discharge.house_load_margin_w;\n}\n\n// V7.3-Felder, die V7.4 bewusst nicht mehr verwendet:\n// - discharge.soc_margin_percent\n// - discharge.fallback_start_min / fallback_end_min\n// - charge_block.min_soc_above_target\n// - komplette house_load-Sektion außer migriertem Margin\n// - alte morgen-/heute-Sonderfelder\n// Diese werden durch mergeSchema automatisch verworfen.\n\n// ------------------------------------------------------\n// 3) Aktuelles Schema aufbauen\n// ------------------------------------------------------\n\nconst config = mergeSchema(DEFAULT_CONFIG, old);\nconfig.version = 7.4;\n\n// ------------------------------------------------------\n// 4) NUR RAM setzen\n// ------------------------------------------------------\n\nflow.set(CONFIG_KEY, config);\nflow.set(\n    \"strategy_v7_config_initialized_at\",\n    new Date().toISOString()\n);\n\nmsg.topic = \"strategy_v7_config_initialized\";\nmsg.payload = {\n    ok: true,\n    version: 7.4,\n    source: sourceName,\n    config_key: CONFIG_KEY,\n    config\n};\n\nnode.status({\n    fill: \"green\",\n    shape: \"dot\",\n    text:\n        sourceName === \"persistent\"\n            ? \"V7.4 Config aus Datei geladen\"\n            : sourceName === \"memory\"\n                ? \"V7.4 Config aus RAM geladen\"\n                : \"V7.4 Defaults geladen\"\n});\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
@@ -891,17 +1172,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 370,
-        "y": 460,
+        "x": 365,
+        "y": 740,
         "wires": [
             []
-        ]
+        ],
+        "g": "b886f3f9b6614672"
     },
     {
         "id": "08b89f7479d7891c",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "V7 Config update",
+        "name": "Config speichern",
         "func": "// ======================================================\n// NODE: Strategie_V7_Config_Update V7.4\n//\n// Zweck:\n// - akzeptiert ausschließlich den GUI-Speicherbutton\n//   topic = \"gui/strategy_config\"\n// - validiert die komplette Konfiguration\n// - schreibt danach RAM + persistent\n// - andere GUI-/Statusmeldungen werden ignoriert\n// ======================================================\n\nconst CONFIG_KEY = \"strategy_v7_config\";\nconst PERSISTENT_STORE = \"persistent\";\n\nconst RULES = {\n    \"location.latitude\":                 { type: \"number\", min: -90,    max: 90 },\n    \"location.longitude\":                { type: \"number\", min: -180,   max: 180 },\n\n    \"battery.capacity_kwh\":              { type: \"number\", min: 1,      max: 500 },\n    \"battery.power_ref_w\":               { type: \"number\", min: 1000,   max: 100000 },\n\n    \"discharge.enabled\":                  { type: \"boolean\" },\n    \"discharge.sunrise_offset_min\":       { type: \"number\", min: 0,      max: 600 },\n    \"discharge.sunrise_end_offset_min\":   { type: \"number\", min: 0,      max: 360 },\n    \"discharge.max_power_w\":              { type: \"number\", min: 0,      max: 30000 },\n    \"discharge.house_load_margin_w\":      { type: \"number\", min: 0,      max: 5000 },\n\n    \"reserve.min_soc_absolute\":           { type: \"number\", min: 0,      max: 100 },\n    \"reserve.very_bad_below_kwh\":         { type: \"number\", min: 0,      max: 500 },\n    \"reserve.target_soc_very_bad\":        { type: \"number\", min: 0,      max: 100 },\n    \"reserve.weak_below_kwh\":             { type: \"number\", min: 0,      max: 500 },\n    \"reserve.target_soc_weak\":            { type: \"number\", min: 0,      max: 100 },\n    \"reserve.medium_below_kwh\":           { type: \"number\", min: 0,      max: 500 },\n    \"reserve.target_soc_medium\":          { type: \"number\", min: 0,      max: 100 },\n    \"reserve.target_soc_good\":            { type: \"number\", min: 0,      max: 100 },\n\n    \"charge_block.enabled\":               { type: \"boolean\" },\n    \"charge_block.duration_min\":          { type: \"number\", min: 0,      max: 720 },\n    \"charge_block.min_today_kwh\":         { type: \"number\", min: 0,      max: 500 },\n\n    \"charge_limit.enabled\":               { type: \"boolean\" },\n    \"charge_limit.very_good_today_min_kwh\": { type: \"number\", min: 0,    max: 500 },\n    \"charge_limit.very_good_percent\":     { type: \"number\", min: 0,      max: 100 },\n    \"charge_limit.good_today_min_kwh\":    { type: \"number\", min: 0,      max: 500 },\n    \"charge_limit.good_percent\":          { type: \"number\", min: 0,      max: 100 },\n    \"charge_limit.medium_today_min_kwh\":  { type: \"number\", min: 0,      max: 500 },\n    \"charge_limit.medium_percent\":        { type: \"number\", min: 0,      max: 100 },\n    \"charge_limit.weak_percent\":          { type: \"number\", min: 0,      max: 100 }\n};\n\nfunction clone(value) {\n    return JSON.parse(JSON.stringify(value));\n}\n\nfunction getNested(obj, path) {\n    let cur = obj;\n\n    for (const key of path.split(\".\")) {\n        if (cur === null || cur === undefined || typeof cur !== \"object\") {\n            return undefined;\n        }\n        cur = cur[key];\n    }\n\n    return cur;\n}\n\nfunction setNested(obj, path, value) {\n    const parts = path.split(\".\");\n    let cur = obj;\n\n    for (let i = 0; i < parts.length - 1; i++) {\n        const key = parts[i];\n\n        if (!cur[key] || typeof cur[key] !== \"object\") {\n            cur[key] = {};\n        }\n\n        cur = cur[key];\n    }\n\n    cur[parts[parts.length - 1]] = value;\n}\n\nfunction normalize(path, value) {\n    const rule = RULES[path];\n\n    if (value === null || value === undefined || value === \"\") {\n        return {\n            ok: false,\n            error: `${path} darf nicht leer sein`\n        };\n    }\n\n    if (rule.type === \"number\") {\n        const n = Number(value);\n\n        if (!Number.isFinite(n)) {\n            return {\n                ok: false,\n                error: `${path} ist keine gültige Zahl`\n            };\n        }\n\n        if (n < rule.min || n > rule.max) {\n            return {\n                ok: false,\n                error: `${path} muss zwischen ${rule.min} und ${rule.max} liegen`\n            };\n        }\n\n        return { ok: true, value: n };\n    }\n\n    if (rule.type === \"boolean\") {\n        if (value === true || value === false) {\n            return { ok: true, value };\n        }\n\n        if ([1, \"1\", \"true\", \"on\"].includes(value)) {\n            return { ok: true, value: true };\n        }\n\n        if ([0, \"0\", \"false\", \"off\"].includes(value)) {\n            return { ok: true, value: false };\n        }\n\n        return {\n            ok: false,\n            error: `${path} ist kein gültiger Ein/Aus-Wert`\n        };\n    }\n\n    return {\n        ok: false,\n        error: `Unbekannter Datentyp für ${path}`\n    };\n}\n\nfunction validate(cfg) {\n    const errors = [];\n\n    const r = cfg.reserve;\n    const c = cfg.charge_limit;\n\n    if (!(r.very_bad_below_kwh < r.weak_below_kwh &&\n          r.weak_below_kwh < r.medium_below_kwh)) {\n        errors.push(\n            \"Reserve: Schwellen müssen aufsteigend sein: \" +\n            \"SEHR SCHLECHT < SCHWACH < MITTEL.\"\n        );\n    }\n\n    const targets = [\n        [\"SEHR SCHLECHT\", r.target_soc_very_bad],\n        [\"SCHWACH\",       r.target_soc_weak],\n        [\"MITTEL\",        r.target_soc_medium],\n        [\"GUT\",           r.target_soc_good]\n    ];\n\n    for (const [name, soc] of targets) {\n        if (soc < r.min_soc_absolute) {\n            errors.push(\n                `${name} Ziel-SOC (${soc}%) liegt unter ` +\n                `dem absoluten Mindest-Ziel-SOC (${r.min_soc_absolute}%).`\n            );\n        }\n    }\n\n    if (!(c.very_good_today_min_kwh >= c.good_today_min_kwh &&\n          c.good_today_min_kwh >= c.medium_today_min_kwh)) {\n        errors.push(\n            \"Ladebegrenzung: Schwellen müssen absteigend sein: \" +\n            \"VERY GOOD >= GOOD >= MEDIUM.\"\n        );\n    }\n\n    if (cfg.discharge.max_power_w > cfg.battery.power_ref_w) {\n        errors.push(\n            \"Max. strategische Entladeleistung darf nicht größer \" +\n            \"als battery.power_ref_w sein.\"\n        );\n    }\n\n    return errors;\n}\n\n// ------------------------------------------------------\n// Nur der grüne GUI-Speicherbutton darf hier speichern.\n// ------------------------------------------------------\n\nif (String(msg.topic || \"\").trim() !== \"gui/strategy_config\") {\n    return null;\n}\n\nconst incoming = msg.payload;\n\nif (!incoming || typeof incoming !== \"object\" || Array.isArray(incoming)) {\n    msg.payload = {\n        ok: false,\n        error: \"GUI Config muss ein Objekt sein.\"\n    };\n\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"GUI Config ungültig\"\n    });\n\n    return msg;\n}\n\nconst current =\n    flow.get(CONFIG_KEY) ||\n    flow.get(CONFIG_KEY, PERSISTENT_STORE);\n\nif (!current || typeof current !== \"object\") {\n    msg.payload = {\n        ok: false,\n        error: \"strategy_v7_config fehlt. Config Init zuerst ausführen.\"\n    };\n\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"V7 Config fehlt\"\n    });\n\n    return msg;\n}\n\n// Saubere neue Config nur aus bekannten Feldern aufbauen.\nconst next = {\n    version: 7.4\n};\n\nfor (const path of Object.keys(RULES)) {\n    const rawIncoming = getNested(incoming, path);\n    const rawCurrent = getNested(current, path);\n    const raw = rawIncoming !== undefined ? rawIncoming : rawCurrent;\n\n    const result = normalize(path, raw);\n\n    if (!result.ok) {\n        msg.payload = {\n            ok: false,\n            error: result.error,\n            field: path\n        };\n\n        node.status({\n            fill: \"red\",\n            shape: \"ring\",\n            text: `Config Fehler: ${path}`\n        });\n\n        return msg;\n    }\n\n    setNested(next, path, result.value);\n}\n\nconst errors = validate(next);\n\nif (errors.length) {\n    msg.payload = {\n        ok: false,\n        error: \"Konfiguration nicht gespeichert.\",\n        validation_errors: errors\n    };\n\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Config Plausibilitätsfehler\"\n    });\n\n    return msg;\n}\n\nconst savedAt = new Date().toISOString();\n\n// Laufende Config\nflow.set(CONFIG_KEY, clone(next));\n\n// Dauerhafte Config auf SD\nflow.set(CONFIG_KEY, clone(next), PERSISTENT_STORE);\n\nflow.set(\"strategy_v7_config_changed_at\", savedAt);\nflow.set(\n    \"strategy_v7_config_saved_at\",\n    savedAt,\n    PERSISTENT_STORE\n);\n\nmsg.topic = \"strategy_v7_config_updated\";\nmsg.payload = {\n    ok: true,\n    saved: true,\n    persistent: true,\n    version: 7.4,\n    saved_at: savedAt,\n    config: next\n};\n\nnode.status({\n    fill: \"green\",\n    shape: \"dot\",\n    text: \"V7.4 dauerhaft gespeichert\"\n});\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
@@ -909,17 +1191,18 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 870,
-        "y": 420,
+        "x": 820,
+        "y": 740,
         "wires": [
             []
-        ]
+        ],
+        "g": "b886f3f9b6614672"
     },
     {
         "id": "ccf4d68ccfa53acf",
         "type": "inject",
         "z": "6301e7be3ca6daa7",
-        "name": "",
+        "name": "alle 10 s",
         "props": [
             {
                 "p": "payload"
@@ -936,43 +1219,45 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 110,
-        "y": 680,
+        "x": 200,
+        "y": 1070,
         "wires": [
             [
                 "9ad4c2d2577b4999"
             ]
-        ]
+        ],
+        "g": "715d3c3666cc1166"
     },
     {
         "id": "9ad4c2d2577b4999",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Verto Batteriedaten abfragen",
-        "func": "msg.url = \"http://10.0.0.216/components/readable\";\nreturn msg;",
+        "name": "URL Batteriedaten",
+        "func": "// ======================================================\n// NODE: URL Batteriedaten\n// Komponenten-/BMS-Daten des Verto (BYD-Speicher).\n// IP aus der Tab-Einstellung VERTO_IP.\n// ======================================================\n\nconst ip = String(env.get(\"VERTO_IP\") || \"\").trim();\n\nif (!ip) {\n    node.status({ fill: \"red\", shape: \"ring\", text: \"VERTO_IP fehlt (Tab-Einstellungen)\" });\n    return null;\n}\n\nmsg.url = \"http://\" + ip + \"/components/readable\";\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 340,
-        "y": 680,
+        "x": 395,
+        "y": 1070,
         "wires": [
             [
                 "f50608b3258ba4b4"
             ]
-        ]
+        ],
+        "g": "715d3c3666cc1166"
     },
     {
         "id": "f50608b3258ba4b4",
         "type": "http request",
         "z": "6301e7be3ca6daa7",
-        "name": "",
+        "name": "Verto Komponenten",
         "method": "GET",
         "ret": "txt",
         "paytoqs": "ignore",
-        "url": "http://10.0.0.216/components/readable",
+        "url": "",
         "tls": "",
         "persist": false,
         "proxy": "",
@@ -980,35 +1265,37 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 570,
-        "y": 680,
+        "x": 620,
+        "y": 1070,
         "wires": [
             [
                 "f48d8d4c87e91023"
             ]
-        ]
+        ],
+        "g": "715d3c3666cc1166"
     },
     {
         "id": "f48d8d4c87e91023",
         "type": "json",
         "z": "6301e7be3ca6daa7",
-        "name": "",
+        "name": "JSON",
         "property": "payload",
         "action": "",
         "pretty": false,
-        "x": 750,
-        "y": 680,
+        "x": 805,
+        "y": 1070,
         "wires": [
             [
                 "98123f1be734b60b"
             ]
-        ]
+        ],
+        "g": "715d3c3666cc1166"
     },
     {
         "id": "98123f1be734b60b",
         "type": "function",
         "z": "6301e7be3ca6daa7",
-        "name": "Byd Chanels ",
+        "name": "BYD-Kanäle auswerten",
         "func": "const data = msg.payload?.Body?.Data;\n\nif (!data) {\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Keine Fronius-Daten\"\n    });\n    return null;\n}\n\n\n// ======================================================\n// BYD-Komponente suchen\n// ======================================================\n\nlet byd = null;\n\nfor (const [id, component] of Object.entries(data)) {\n\n    if (\n        component?.attributes?.manufacturer === \"BYD\" ||\n        component?.attributes?.model === \"HVM+\" ||\n        id.startsWith(\"BYD_Storage\")\n    ) {\n        byd = component;\n        break;\n    }\n}\n\n\nif (!byd || !byd.channels) {\n\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"BYD nicht gefunden\"\n    });\n\n    return null;\n}\n\n\nconst c = byd.channels;\nconst a = byd.attributes || {};\n\n\n// ======================================================\n// Hilfsfunktionen\n// ======================================================\n\nfunction number(v) {\n\n    const n = Number(v);\n\n    return Number.isFinite(n)\n        ? n\n        : null;\n}\n\n\nfunction round(v, decimals = 1) {\n\n    if (!Number.isFinite(v)) {\n        return null;\n    }\n\n    const f = Math.pow(10, decimals);\n\n    return Math.round(v * f) / f;\n}\n\n\nfunction jouleToKWh(v) {\n\n    const n = number(v);\n\n    if (n === null) {\n        return null;\n    }\n\n    return n / 3600000;\n}\n\n\n// ======================================================\n// Werte lesen\n// ======================================================\n\nconst soc =\n    number(\n        c.BAT_VALUE_STATE_OF_CHARGE_RELATIVE_F32\n    );\n\nconst soh =\n    number(\n        c.BAT_VALUE_STATE_OF_HEALTH_RELATIVE_U16\n    );\n\n\nconst temp =\n    number(\n        c.BAT_TEMPERATURE_CELL_F64\n    );\n\nconst tempMin =\n    number(\n        c.BAT_TEMPERATURE_CELL_MIN_F64\n    );\n\nconst tempMax =\n    number(\n        c.BAT_TEMPERATURE_CELL_MAX_F64\n    );\n\n\nconst voltage =\n    number(\n        c.BAT_VOLTAGE_DC_INTERNAL_F64\n    );\n\nconst current =\n    number(\n        c.BAT_CURRENT_DC_INTERNAL_F64\n    );\n\n\nconst power =\n    voltage !== null &&\n        current !== null\n\n        ? voltage * current\n        : null;\n\n\nconst capacity =\n    jouleToKWh(\n        c.BAT_ENERGYACTIVE_MAX_CAPACITY_F64\n    );\n\n\nconst storedEnergy =\n    jouleToKWh(\n        c.BAT_ENERGYACTIVE_ESTIMATION_MAX_CAPACITY_F64\n    );\n\n\nconst lifetimeCharged =\n    jouleToKWh(\n        c.BAT_ENERGYACTIVE_LIFETIME_CHARGED_F64\n    );\n\n\nconst lifetimeDischarged =\n    jouleToKWh(\n        c.BAT_ENERGYACTIVE_LIFETIME_DISCHARGED_F64\n    );\n\n\nconst maxCharge =\n    number(\n        c.DCLINK_POWERACTIVE_MAX_F32\n    );\n\n\nconst maxDischarge =\n    number(\n        c.DCLINK_POWERACTIVE_LIMIT_DISCHARGE_F64\n    );\n\n\n// ======================================================\n// Betriebszustand\n// BYD: negativer Strom = Entladen\n// ======================================================\n\nlet operation = \"Standby\";\n\nif (power !== null) {\n\n    if (power < -50) {\n        operation = \"Entladen\";\n    }\n\n    else if (power > 50) {\n        operation = \"Laden\";\n    }\n}\n\n\n// ======================================================\n// GUI Payload\n// ======================================================\n\nmsg.topic = \"battery_data\";\n\n\nmsg.payload = {\n\n    model:\n        a.model || \"BYD\",\n\n    serial:\n        a.serial || null,\n\n    stacks:\n        number(a.numberStacks),\n\n\n    SOC_pct:\n        round(soc, 1),\n\n    SOH_pct:\n        round(soh, 0),\n\n\n    Temperatur_C:\n        round(temp, 1),\n\n    Temperatur_Min_C:\n        round(tempMin, 1),\n\n    Temperatur_Max_C:\n        round(tempMax, 1),\n\n    Temperatur_Delta_K:\n        tempMin !== null &&\n            tempMax !== null\n\n            ? round(\n                tempMax - tempMin,\n                1\n            )\n\n            : null,\n\n\n    Spannung_V:\n        round(voltage, 1),\n\n    Strom_A:\n        round(current, 2),\n\n    Leistung_W:\n        round(power, 0),\n\n    Betrieb:\n        operation,\n\n\n    Kapazitaet_kWh:\n        round(capacity, 2),\n\n    Energie_aktuell_kWh:\n        round(storedEnergy, 2),\n\n\n    Lifetime_Geladen_kWh:\n        round(lifetimeCharged, 0),\n\n    Lifetime_Entladen_kWh:\n        round(lifetimeDischarged, 0),\n\n\n    Max_Laden_W:\n        round(maxCharge, 0),\n\n    Max_Entladen_W:\n        round(maxDischarge, 0),\n\n\n    // Rohdaten bleiben erhalten,\n    // werden aber NICHT visualisiert.\n    raw:\n        c\n};\n\n\n// ======================================================\n// Node Status\n// ======================================================\n\nconst socText =\n    soc !== null\n        ? soc.toFixed(1)\n        : \"?\";\n\nconst sohText =\n    soh !== null\n        ? soh.toFixed(0)\n        : \"?\";\n\nconst tMinText =\n    tempMin !== null\n        ? tempMin.toFixed(1)\n        : \"?\";\n\nconst tMaxText =\n    tempMax !== null\n        ? tempMax.toFixed(1)\n        : \"?\";\n\n\nnode.status({\n\n    fill: \"green\",\n\n    shape: \"dot\",\n\n    text:\n        `SOC ${socText}% | ` +\n        `SOH ${sohText}% | ` +\n        `${tMinText}–${tMaxText} °C`\n});\n\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
@@ -1016,13 +1303,14 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 930,
-        "y": 680,
+        "x": 1010,
+        "y": 1070,
         "wires": [
             [
-                "135dceee5a6e573e"
+                "59bfb67a0b78f6d9"
             ]
-        ]
+        ],
+        "g": "715d3c3666cc1166"
     },
     {
         "id": "51cac8297ae2844f",
@@ -1040,21 +1328,23 @@
         "log": false,
         "pathlog": "",
         "x": 240,
-        "y": 200,
+        "y": 330,
         "wires": [
             [],
             []
-        ]
+        ],
+        "g": "6a5be7948e18826e"
     },
     {
         "id": "569cf436e87280c0",
         "type": "comment",
         "z": "e7418f17a21aa1b7",
-        "name": "Wattpilot: Doppelklick auf den gelben Node → IP + Passwort",
+        "name": "Doppelklick auf „Wattpilot Flex“ → IP + Passwort",
         "info": "Siehe Beschreibung im Subflow „Wattpilot“.",
-        "x": 360,
-        "y": 320,
-        "wires": []
+        "x": 370,
+        "y": 80,
+        "wires": [],
+        "g": "7505fb73bffd0cce"
     },
     {
         "id": "ca9a37eb6c38d1d5",
@@ -1064,13 +1354,15 @@
         "links": [
             "0fcd153721565e25"
         ],
-        "x": 245,
-        "y": 380,
+        "x": 230,
+        "y": 160,
         "wires": [
             [
                 "9985640af8507b79"
             ]
-        ]
+        ],
+        "g": "7505fb73bffd0cce",
+        "l": true
     },
     {
         "id": "9985640af8507b79",
@@ -1084,8 +1376,8 @@
                 "type": "str"
             }
         ],
-        "x": 460,
-        "y": 380,
+        "x": 440,
+        "y": 160,
         "wires": [
             [
                 "f2bdad5c08e68bb6",
@@ -1094,7 +1386,8 @@
             [
                 "b45d94273525e4d6"
             ]
-        ]
+        ],
+        "g": "7505fb73bffd0cce"
     },
     {
         "id": "f2bdad5c08e68bb6",
@@ -1105,9 +1398,11 @@
         "links": [
             "c6aa4c3b4f3194e1"
         ],
-        "x": 695,
-        "y": 360,
-        "wires": []
+        "x": 710,
+        "y": 120,
+        "wires": [],
+        "g": "7505fb73bffd0cce",
+        "l": true
     },
     {
         "id": "9421770002ef5c60",
@@ -1122,9 +1417,10 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 740,
-        "y": 400,
-        "wires": []
+        "x": 710,
+        "y": 160,
+        "wires": [],
+        "g": "7505fb73bffd0cce"
     },
     {
         "id": "b45d94273525e4d6",
@@ -1139,37 +1435,333 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 740,
-        "y": 440,
-        "wires": []
+        "x": 710,
+        "y": 200,
+        "wires": [],
+        "g": "7505fb73bffd0cce"
     },
     {
         "id": "c6aa4c3b4f3194e1",
         "type": "link in",
         "z": "6301e7be3ca6daa7",
-        "name": "Wattpilot Daten",
+        "name": "Wattpilot-Daten",
         "links": [
             "f2bdad5c08e68bb6"
         ],
-        "x": 545,
-        "y": 410,
+        "x": 455,
+        "y": 1300,
         "wires": [
             [
                 "135dceee5a6e573e"
             ]
-        ]
+        ],
+        "l": true,
+        "g": "19391d7d50fb664c"
     },
     {
         "id": "0fcd153721565e25",
         "type": "link out",
         "z": "6301e7be3ca6daa7",
-        "name": "an Wattpilot",
+        "name": "→ Wattpilot",
         "mode": "link",
         "links": [
             "ca9a37eb6c38d1d5"
         ],
-        "x": 845,
-        "y": 470,
-        "wires": []
+        "x": 865,
+        "y": 1300,
+        "wires": [],
+        "l": true,
+        "g": "19391d7d50fb664c"
+    },
+    {
+        "id": "408dfc86275a90b4",
+        "type": "function",
+        "z": "6301e7be3ca6daa7",
+        "name": "URL Powerflow",
+        "func": "// ======================================================\n// NODE: URL Powerflow\n// Baut die Solar-API-Adresse des Verto aus der\n// Tab-Einstellung VERTO_IP (Doppelklick auf den Tab).\n// ======================================================\n\nconst ip = String(env.get(\"VERTO_IP\") || \"\").trim();\n\nif (!ip) {\n    node.status({ fill: \"red\", shape: \"ring\", text: \"VERTO_IP fehlt (Tab-Einstellungen)\" });\n    return null;\n}\n\nmsg.url = \"http://\" + ip + \"/solar_api/v1/GetPowerFlowRealtimeData.fcgi\";\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 385,
+        "y": 80,
+        "wires": [
+            [
+                "fd347b5e56e72cd2"
+            ]
+        ],
+        "g": "d7616d62d4932c6b"
+    },
+    {
+        "id": "358ed3b6ef546205",
+        "type": "function",
+        "z": "6301e7be3ca6daa7",
+        "name": "URL Prognose",
+        "func": "// ======================================================\n// NODE: URL Prognose\n//\n// forecast.solar-Abfrage aus:\n// - Standort: Strategie-Einstellungen im Dashboard\n//   (derselbe Standort wie für den Sonnenaufgang)\n// - PV-Anlage: Tab-Einstellungen PV_NEIGUNG, PV_AZIMUT, PV_KWP\n//\n// Beim Start kann die Strategie-Config noch fehlen:\n// dann bis zu 60 s warten und erneut versuchen.\n// ======================================================\n\nconst CONFIG_KEY = \"strategy_v7_config\";\nconst RETRY_MS = 5000;\nconst MAX_TRIES = 12;\n\nfunction buildUrl() {\n    const cfg = flow.get(CONFIG_KEY);\n    const lat = Number(cfg?.location?.latitude);\n    const lon = Number(cfg?.location?.longitude);\n\n    const tilt = Number(env.get(\"PV_NEIGUNG\"));\n    const azimuth = Number(env.get(\"PV_AZIMUT\"));\n    const kwp = Number(env.get(\"PV_KWP\"));\n\n    if (![tilt, azimuth, kwp].every(Number.isFinite)) {\n        return { error: \"PV_NEIGUNG / PV_AZIMUT / PV_KWP fehlen (Tab-Einstellungen)\" };\n    }\n\n    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {\n        return { wait: true };\n    }\n\n    return {\n        url:\n            \"https://api.forecast.solar/estimate/\" +\n            lat.toFixed(4) + \"/\" +\n            lon.toFixed(4) + \"/\" +\n            tilt + \"/\" +\n            azimuth + \"/\" +\n            kwp,\n        text: lat.toFixed(2) + \" / \" + lon.toFixed(2) + \" · \" + kwp + \" kWp\"\n    };\n}\n\nfunction done(r) {\n    msg.url = r.url;\n    node.status({ fill: \"green\", shape: \"dot\", text: r.text });\n    node.send(msg);\n}\n\nconst first = buildUrl();\n\nif (first.error) {\n    node.status({ fill: \"red\", shape: \"ring\", text: first.error });\n    return null;\n}\n\nif (first.url) {\n    done(first);\n    return null;\n}\n\n// Strategie-Config noch nicht geladen -> warten\nlet tries = 0;\nnode.status({ fill: \"yellow\", shape: \"ring\", text: \"warte auf Strategie-Standort\" });\n\nconst timer = setInterval(() => {\n    tries++;\n    const r = buildUrl();\n\n    if (r.url) {\n        clearInterval(timer);\n        done(r);\n    } else if (tries >= MAX_TRIES) {\n        clearInterval(timer);\n        node.status({ fill: \"red\", shape: \"ring\", text: \"kein Standort in der Strategie-Config\" });\n        node.error(\"Prognose übersprungen: Standort in strategy_v7_config fehlt\", msg);\n    }\n}, RETRY_MS);\n\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 425,
+        "y": 270,
+        "wires": [
+            [
+                "27537240031a7b38"
+            ]
+        ],
+        "g": "1dcc23f7b69e8173"
+    },
+    {
+        "id": "984251d398278eb0",
+        "type": "function",
+        "z": "6301e7be3ca6daa7",
+        "name": "URL Shelly",
+        "func": "// ======================================================\n// NODE: URL Shelly Heubelüftung\n// Status des Planer-Skripts am Shelly.\n// IP aus der Tab-Einstellung SHELLY_IP.\n// ======================================================\n\nconst ip = String(env.get(\"SHELLY_IP\") || \"\").trim();\n\nif (!ip) {\n    node.status({ fill: \"red\", shape: \"ring\", text: \"SHELLY_IP fehlt (Tab-Einstellungen)\" });\n    return null;\n}\n\nmsg.url = \"http://\" + ip + \"/script/1/planer?status=1\";\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 395,
+        "y": 450,
+        "wires": [
+            [
+                "2a8d588540a1878d"
+            ]
+        ],
+        "g": "559a0358e0d982d7"
+    },
+    {
+        "id": "90832d0e311854f8",
+        "type": "inject",
+        "z": "6301e7be3ca6daa7",
+        "name": "jede Minute",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 210,
+        "y": 450,
+        "wires": [
+            [
+                "984251d398278eb0"
+            ]
+        ],
+        "g": "559a0358e0d982d7"
+    },
+    {
+        "id": "c553677291d76173",
+        "type": "link out",
+        "z": "6301e7be3ca6daa7",
+        "name": "→ Strategie",
+        "mode": "link",
+        "links": [
+            "98f5acd283645688"
+        ],
+        "l": true,
+        "x": 1460,
+        "y": 80,
+        "wires": [],
+        "g": "d7616d62d4932c6b"
+    },
+    {
+        "id": "98f5acd283645688",
+        "type": "link in",
+        "z": "6301e7be3ca6daa7",
+        "name": "Live-Daten",
+        "links": [
+            "c553677291d76173"
+        ],
+        "l": true,
+        "x": 210,
+        "y": 635,
+        "wires": [
+            [
+                "b095a4c7d3d9ff0b"
+            ]
+        ],
+        "g": "b886f3f9b6614672"
+    },
+    {
+        "id": "377ef37c09a350ee",
+        "type": "link out",
+        "z": "6301e7be3ca6daa7",
+        "name": "→ Modbus",
+        "mode": "link",
+        "links": [
+            "22b33fe25cf29314"
+        ],
+        "l": true,
+        "x": 590,
+        "y": 635,
+        "wires": [],
+        "g": "b886f3f9b6614672"
+    },
+    {
+        "id": "22b33fe25cf29314",
+        "type": "link in",
+        "z": "6301e7be3ca6daa7",
+        "name": "Sollwerte",
+        "links": [
+            "377ef37c09a350ee"
+        ],
+        "l": true,
+        "x": 200,
+        "y": 870,
+        "wires": [
+            [
+                "8a23fb970444f86c"
+            ]
+        ],
+        "g": "18314bc9cc35f1d1"
+    },
+    {
+        "id": "b6eea9f57c997369",
+        "type": "link out",
+        "z": "6301e7be3ca6daa7",
+        "name": "→ Dashboard",
+        "mode": "link",
+        "links": [
+            "105e3f9a886729a0"
+        ],
+        "l": true,
+        "x": 590,
+        "y": 680,
+        "wires": [],
+        "g": "b886f3f9b6614672"
+    },
+    {
+        "id": "105e3f9a886729a0",
+        "type": "link in",
+        "z": "6301e7be3ca6daa7",
+        "name": "Strategie-Status",
+        "links": [
+            "b6eea9f57c997369"
+        ],
+        "l": true,
+        "x": 230,
+        "y": 1200,
+        "wires": [
+            [
+                "749ddfd6017af057"
+            ]
+        ],
+        "g": "19391d7d50fb664c"
+    },
+    {
+        "id": "59bfb67a0b78f6d9",
+        "type": "link out",
+        "z": "6301e7be3ca6daa7",
+        "name": "→ Dashboard",
+        "mode": "link",
+        "links": [
+            "ee2c0ac396147831"
+        ],
+        "l": true,
+        "x": 1235,
+        "y": 1070,
+        "wires": [],
+        "g": "715d3c3666cc1166"
+    },
+    {
+        "id": "ee2c0ac396147831",
+        "type": "link in",
+        "z": "6301e7be3ca6daa7",
+        "name": "Batteriedaten",
+        "links": [
+            "59bfb67a0b78f6d9"
+        ],
+        "l": true,
+        "x": 455,
+        "y": 1255,
+        "wires": [
+            [
+                "135dceee5a6e573e"
+            ]
+        ],
+        "g": "19391d7d50fb664c"
+    },
+    {
+        "id": "ebe99c241579c6a1",
+        "type": "link out",
+        "z": "6301e7be3ca6daa7",
+        "name": "→ Config speichern",
+        "mode": "link",
+        "links": [
+            "f6fb9940122a126c"
+        ],
+        "l": true,
+        "x": 865,
+        "y": 1255,
+        "wires": [],
+        "g": "19391d7d50fb664c"
+    },
+    {
+        "id": "f6fb9940122a126c",
+        "type": "link in",
+        "z": "6301e7be3ca6daa7",
+        "name": "Config aus GUI",
+        "links": [
+            "ebe99c241579c6a1"
+        ],
+        "l": true,
+        "x": 605,
+        "y": 740,
+        "wires": [
+            [
+                "08b89f7479d7891c"
+            ]
+        ],
+        "g": "b886f3f9b6614672"
+    },
+    {
+        "id": "4d9a58dd1f29cdd5",
+        "type": "link out",
+        "z": "6301e7be3ca6daa7",
+        "name": "→ Entladesperren",
+        "mode": "link",
+        "links": [
+            "11967f8ab2d05525"
+        ],
+        "l": true,
+        "x": 1110,
+        "y": 1200,
+        "wires": [],
+        "g": "19391d7d50fb664c"
+    },
+    {
+        "id": "11967f8ab2d05525",
+        "type": "link in",
+        "z": "6301e7be3ca6daa7",
+        "name": "Sperre aus GUI",
+        "links": [
+            "4d9a58dd1f29cdd5"
+        ],
+        "l": true,
+        "x": 1005,
+        "y": 505,
+        "wires": [
+            [
+                "b68362bf68f6153e"
+            ]
+        ],
+        "g": "559a0358e0d982d7"
     }
 ]
