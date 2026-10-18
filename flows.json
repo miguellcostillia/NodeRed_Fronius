@@ -896,5 +896,134 @@
             [],
             []
         ]
+    },
+    {
+        "id": "89051aed40dad29a",
+        "type": "comment",
+        "z": "e7418f17a21aa1b7",
+        "name": "Wattpilot Websocket-Anbindung (siehe Info)",
+        "info": "Wattpilot Flex (10.0.0.102) über die lokale Websocket-Schnittstelle.\n\nEinrichtung auf dem Pi:\n- Passwort als Umgebungsvariable WATTPILOT_PASSWORD (nicht im Flow!)\n- settings.js: functionExternalModules: true (für bcryptjs)\n\nDaten: global \"wattpilot\" (aufbereitet), global \"wattpilot_raw\" (alle Rohwerte)\nBefehle: an Link \"Wattpilot Befehl\" mit\n  msg.topic = \"wattpilot/set\"\n  msg.payload = { key: \"amp\", value: 16 }  (oder Array)\n",
+        "x": 290,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "570b98c66f9384ce",
+        "type": "websocket in",
+        "z": "e7418f17a21aa1b7",
+        "name": "Wattpilot empfangen",
+        "server": "",
+        "client": "d52cac4202ff0204",
+        "x": 200,
+        "y": 360,
+        "wires": [
+            [
+                "e35c31121a3d2785"
+            ]
+        ]
+    },
+    {
+        "id": "4938645f08e4daf0",
+        "type": "link in",
+        "z": "e7418f17a21aa1b7",
+        "name": "Wattpilot Befehl",
+        "links": [],
+        "x": 225,
+        "y": 420,
+        "wires": [
+            [
+                "e35c31121a3d2785"
+            ]
+        ]
+    },
+    {
+        "id": "e35c31121a3d2785",
+        "type": "function",
+        "z": "e7418f17a21aa1b7",
+        "name": "Wattpilot Protokoll",
+        "func": "// ======================================================\n// NODE: Wattpilot Protokoll\n//\n// Zweck:\n// - Websocket-Protokoll des Wattpilot (lokal, ws://<ip>/ws)\n// - Anmeldung: hello -> authRequired -> auth -> authSuccess\n//   * Wattpilot Flex: bcrypt (Salt aus Seriennummer)\n//   * Wattpilot Home: pbkdf2-sha512\n// - fullStatus / deltaStatus in global \"wattpilot_raw\" sammeln\n// - Befehle (topic \"wattpilot/set\") als securedMsg mit HMAC senden\n//\n// Eingänge:\n// - Nachrichten vom \"websocket in\" (msg.payload = JSON-String)\n// - Befehle: msg.topic = \"wattpilot/set\",\n//            msg.payload = { key: \"amp\", value: 16 }\n//            oder Array solcher Objekte\n//\n// Ausgänge:\n// 1) an \"websocket out\" (fertige Websocket-Nachricht)\n// 2) Statusänderungen (deltaStatus / fullStatus) für Aufbereitung\n//\n// Passwort:\n// - Umgebungsvariable WATTPILOT_PASSWORD auf dem Pi\n//   (nicht im Flow speichern, flows.json liegt auf GitHub)\n// ======================================================\n\nconst PASSWORD = env.get(\"WATTPILOT_PASSWORD\");\n\n// ------------------------------------------------------\n// Hilfsfunktionen\n// ------------------------------------------------------\n\nfunction sha256hex(text) {\n    return crypto.createHash(\"sha256\").update(text, \"utf8\").digest(\"hex\");\n}\n\nfunction bytesToBcryptSalt(serial) {\n    // 16 Byte, Ziffern der Seriennummer rechtsbündig als Rohwerte 0-9\n    const b = new Array(16).fill(0);\n    const s = String(serial);\n    const offset = 16 - s.length;\n\n    for (let i = 0; i < s.length; i++) {\n        if (offset + i >= 0) {\n            b[offset + i] = s.charCodeAt(i) - 48;\n        }\n    }\n\n    return bcrypt.encodeBase64(b, 16);\n}\n\nfunction hashPassword(serial, password, algorithm) {\n    if (algorithm === \"bcrypt\") {\n        if (!/^\\d+$/.test(String(serial))) {\n            throw new Error(\"Seriennummer muss nur aus Ziffern bestehen\");\n        }\n\n        const salt = \"$2a$08$\" + bytesToBcryptSalt(serial);\n        const full = bcrypt.hashSync(sha256hex(password), salt);\n\n        // Nur der Hash-Teil nach dem Salt\n        return full.substring(salt.length);\n    }\n\n    // pbkdf2 (Wattpilot Home / ältere Firmware)\n    const key = crypto.pbkdf2Sync(\n        password, String(serial), 100000, 256, \"sha512\"\n    );\n\n    return key.toString(\"base64\").substring(0, 32);\n}\n\nfunction send(obj) {\n    return [{ payload: JSON.stringify(obj) }, null];\n}\n\nfunction setStatus(fill, text) {\n    node.status({ fill, shape: fill === \"green\" ? \"dot\" : \"ring\", text });\n}\n\n// ------------------------------------------------------\n// Verbindungszustand (nur RAM)\n// ------------------------------------------------------\n\nlet conn = context.get(\"conn\") || {\n    serial: null,\n    devicetype: null,\n    version: null,\n    secured: true,\n    authenticated: false,\n    hashedPassword: null,\n    requestId: 0\n};\n\nfunction saveConn() {\n    context.set(\"conn\", conn);\n    global.set(\"wattpilot_connection\", {\n        serial: conn.serial,\n        devicetype: conn.devicetype,\n        version: conn.version,\n        authenticated: conn.authenticated,\n        updated: Date.now()\n    });\n}\n\n// ======================================================\n// 1) BEFEHLE AUS NODE-RED\n// ======================================================\n\nif (msg.topic === \"wattpilot/set\") {\n    if (!conn.authenticated) {\n        node.warn(\"Wattpilot nicht verbunden, Befehl verworfen\");\n        return null;\n    }\n\n    const list = Array.isArray(msg.payload) ? msg.payload : [msg.payload];\n    const out = [];\n\n    for (const cmd of list) {\n        if (!cmd || typeof cmd.key !== \"string\" || cmd.value === undefined) {\n            node.warn(\"Ungültiger Wattpilot-Befehl: \" + JSON.stringify(cmd));\n            continue;\n        }\n\n        // Feldreihenfolge wie bei der Referenz-Implementierung\n        const setValue = {\n            requestId: conn.requestId,\n            key: cmd.key,\n            value: cmd.value,\n            type: \"setValue\"\n        };\n\n        let wsMsg;\n\n        if (conn.secured) {\n            const data = JSON.stringify(setValue);\n            const hmac = crypto\n                .createHmac(\"sha256\", Buffer.from(conn.hashedPassword, \"utf8\"))\n                .update(data, \"utf8\")\n                .digest(\"hex\");\n\n            wsMsg = {\n                type: \"securedMsg\",\n                data,\n                requestId: conn.requestId + \"sm\",\n                hmac\n            };\n        } else {\n            wsMsg = setValue;\n        }\n\n        // requestId startet pro Verbindung bei 0 und steigt um 1\n        conn.requestId++;\n        out.push({ payload: JSON.stringify(wsMsg) });\n    }\n\n    saveConn();\n    return [out, null];\n}\n\n// ======================================================\n// 2) NACHRICHTEN VOM WATTPILOT\n// ======================================================\n\nlet m = msg.payload;\n\nif (typeof m === \"string\") {\n    try {\n        m = JSON.parse(m);\n    } catch (e) {\n        return null;\n    }\n}\n\nif (!m || typeof m !== \"object\") {\n    return null;\n}\n\nswitch (m.type) {\n\n    case \"hello\": {\n        // Neue Verbindung: Zustand zurücksetzen\n        conn = {\n            serial: m.serial,\n            devicetype: m.devicetype,\n            version: m.version,\n            secured: m.secured !== false,\n            authenticated: m.secured === false,\n            hashedPassword: null,\n            requestId: 0\n        };\n        saveConn();\n        setStatus(\"yellow\", \"hello \" + m.devicetype + \" v\" + m.version);\n        return null;\n    }\n\n    case \"authRequired\": {\n        if (!PASSWORD) {\n            setStatus(\"red\", \"WATTPILOT_PASSWORD fehlt\");\n            node.error(\"Umgebungsvariable WATTPILOT_PASSWORD ist nicht gesetzt\");\n            return null;\n        }\n\n        let algorithm = m.hash;\n        if (!algorithm) {\n            algorithm = conn.devicetype === \"wattpilot_flex\" ? \"bcrypt\" : \"pbkdf2\";\n        }\n\n        // Hash pro Seriennummer/Algorithmus zwischenspeichern\n        const cacheKey = conn.serial + \"|\" + algorithm;\n        let cache = context.get(\"hashCache\") || {};\n\n        if (!cache[cacheKey]) {\n            try {\n                cache = { [cacheKey]: hashPassword(conn.serial, PASSWORD, algorithm) };\n                context.set(\"hashCache\", cache);\n            } catch (e) {\n                setStatus(\"red\", \"Hash-Fehler\");\n                node.error(\"Passwort-Hash fehlgeschlagen: \" + e.message);\n                return null;\n            }\n        }\n\n        conn.hashedPassword = cache[cacheKey];\n        saveConn();\n\n        const token3 = crypto.randomBytes(16).toString(\"hex\");\n        const hash1 = sha256hex(m.token1 + conn.hashedPassword);\n        const hash = sha256hex(token3 + m.token2 + hash1);\n\n        setStatus(\"yellow\", \"Anmeldung (\" + algorithm + \")\");\n        return send({ type: \"auth\", token3, hash });\n    }\n\n    case \"authSuccess\": {\n        conn.authenticated = true;\n        conn.requestId = 0;\n        saveConn();\n        setStatus(\"green\", \"verbunden \" + conn.serial);\n        return null;\n    }\n\n    case \"authError\": {\n        conn.authenticated = false;\n        saveConn();\n        setStatus(\"red\", \"Anmeldung fehlgeschlagen\");\n        node.error(\"Wattpilot Anmeldung fehlgeschlagen: \" + (m.message || \"\"));\n        return null;\n    }\n\n    case \"fullStatus\":\n    case \"deltaStatus\": {\n        const raw = global.get(\"wattpilot_raw\") || {};\n        const changed = m.status || {};\n\n        Object.assign(raw, changed);\n        global.set(\"wattpilot_raw\", raw);\n        global.set(\"wattpilot_raw_updated\", Date.now());\n\n        return [null, {\n            topic: m.type,\n            partial: m.partial === true,\n            payload: changed\n        }];\n    }\n\n    case \"response\": {\n        if (m.success === false) {\n            node.warn(\"Wattpilot Befehl abgelehnt: \" + (m.message || JSON.stringify(m)));\n            setStatus(\"red\", \"Befehl abgelehnt\");\n        } else if (m.status && typeof m.status === \"object\") {\n            const raw = global.get(\"wattpilot_raw\") || {};\n            Object.assign(raw, m.status);\n            global.set(\"wattpilot_raw\", raw);\n\n            return [null, { topic: \"response\", payload: m.status }];\n        }\n        return null;\n    }\n\n    default:\n        return null;\n}\n",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            },
+            {
+                "var": "bcrypt",
+                "module": "bcryptjs"
+            }
+        ],
+        "x": 450,
+        "y": 380,
+        "wires": [
+            [
+                "8bb67d4775a6557f"
+            ],
+            [
+                "305f12b06f6e8192"
+            ]
+        ]
+    },
+    {
+        "id": "8bb67d4775a6557f",
+        "type": "websocket out",
+        "z": "e7418f17a21aa1b7",
+        "name": "Wattpilot senden",
+        "server": "",
+        "client": "d52cac4202ff0204",
+        "x": 700,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "305f12b06f6e8192",
+        "type": "function",
+        "z": "e7418f17a21aa1b7",
+        "name": "Wattpilot Werte aufbereiten",
+        "func": "// ======================================================\n// NODE: Wattpilot Werte aufbereiten\n//\n// Zweck:\n// - Rohwerte aus global \"wattpilot_raw\" in ein lesbares\n//   Objekt global \"wattpilot\" umformen\n// - für Strategie, GUI und Debug\n// - höchstens 1x pro Sekunde ausgeben\n// ======================================================\n\nconst MIN_INTERVAL_MS = 1000;\n\nconst raw = global.get(\"wattpilot_raw\") || {};\nconst conn = global.get(\"wattpilot_connection\") || {};\n\nconst now = Date.now();\nconst last = context.get(\"last\") || 0;\n\nif (now - last < MIN_INTERVAL_MS && msg.topic !== \"fullStatus\") {\n    // Spätestens nach Ablauf trotzdem einmal aktualisieren\n    if (!context.get(\"pending\")) {\n        context.set(\"pending\", true);\n        setTimeout(() => {\n            context.set(\"pending\", false);\n            node.emit(\"input\", { topic: \"deferred\" });\n        }, MIN_INTERVAL_MS);\n    }\n    return null;\n}\n\ncontext.set(\"last\", now);\n\n// ------------------------------------------------------\n// Hilfsfunktionen\n// ------------------------------------------------------\n\nfunction num(v) {\n    if (v === null || v === undefined || v === \"\") return null;\n    const n = Number(v);\n    return Number.isFinite(n) ? n : null;\n}\n\nfunction round(v, d = 0) {\n    const n = num(v);\n    if (n === null) return null;\n    const f = Math.pow(10, d);\n    return Math.round(n * f) / f;\n}\n\nconst CAR_STATES = {\n    0: \"Unbekannt\",\n    1: \"Kein Auto\",\n    2: \"Lädt\",\n    3: \"Wartet\",\n    4: \"Ladung beendet\",\n    5: \"Fehler\"\n};\n\nconst MODES = {\n    3: \"Standard\",\n    4: \"Eco\",\n    5: \"Next Trip\"\n};\n\nconst FORCE = {\n    0: \"Neutral\",\n    1: \"Aus\",\n    2: \"Ein\"\n};\n\nconst PHASE_MODE = {\n    0: \"Auto\",\n    1: \"1-phasig\",\n    2: \"3-phasig\"\n};\n\n// nrg: [U1, U2, U3, UN, I1, I2, I3, P1, P2, P3, PN, Pges, pf1, pf2, pf3, pfN]\nconst nrg = Array.isArray(raw.nrg) ? raw.nrg : [];\n\nconst carState = num(raw.car);\nconst mode = num(raw.lmo);\nconst force = num(raw.frc);\nconst psm = num(raw.psm);\n\nconst wp = {\n    connected: conn.authenticated === true,\n    serial: conn.serial || raw.sse || null,\n    devicetype: conn.devicetype || null,\n    firmware: conn.version || raw.fwv || null,\n\n    // Fahrzeug\n    car_state: carState,\n    car_state_label: CAR_STATES[carState] ?? \"—\",\n    car_connected: carState === 2 || carState === 3 || carState === 4,\n    charging: carState === 2,\n    charging_allowed: raw.alw === true,\n    model_status: num(raw.modelStatus),\n    error: num(raw.err),\n\n    // Leistung / Energie\n    power_w: round(nrg[11], 0),\n    power_l1_w: round(nrg[7], 0),\n    power_l2_w: round(nrg[8], 0),\n    power_l3_w: round(nrg[9], 0),\n    voltage_l1_v: round(nrg[0], 1),\n    voltage_l2_v: round(nrg[1], 1),\n    voltage_l3_v: round(nrg[2], 1),\n    current_l1_a: round(nrg[4], 2),\n    current_l2_a: round(nrg[5], 2),\n    current_l3_a: round(nrg[6], 2),\n    phases_active: num(raw.pnp),\n    session_kwh: num(raw.wh) !== null ? round(num(raw.wh) / 1000, 2) : null,\n    total_kwh: num(raw.eto) !== null ? round(num(raw.eto) / 1000, 1) : null,\n\n    // Einstellungen\n    current_a: num(raw.amp),\n    current_max_a: num(raw.ama),\n    current_min_a: num(raw.mca),\n    cable_limit_a: num(raw.cbl),\n    mode: mode,\n    mode_label: MODES[mode] ?? \"—\",\n    force_state: force,\n    force_state_label: FORCE[force] ?? \"—\",\n    phase_mode: psm,\n    phase_mode_label: PHASE_MODE[psm] ?? \"—\",\n    pv_surplus_enabled: raw.fup === true,\n    pv_start_power_w: num(raw.fst),\n    pv_battery_limit_soc: num(raw.fam),\n    boost_enabled: raw.ebe === true,\n    boost_battery_soc: num(raw.ebt),\n    zero_feedin: raw.fzf === true,\n\n    // Was der Wattpilot selbst vom Wechselrichter sieht\n    wp_grid_w: num(raw.pgrid),\n    wp_pv_w: num(raw.ppv),\n    wp_battery_w: num(raw.pakku),\n    wp_avg_grid_w: num(raw.pvopt_averagePGrid),\n    wp_avg_pv_w: num(raw.pvopt_averagePPv),\n    wp_avg_battery_w: num(raw.pvopt_averagePAkku),\n    wp_surplus_delta_w: num(raw.pvopt_deltaP),\n\n    updated_at: new Date().toISOString(),\n    raw_age_s: round((now - (global.get(\"wattpilot_raw_updated\") || now)) / 1000, 0)\n};\n\nglobal.set(\"wattpilot\", wp);\n\nnode.status({\n    fill: wp.connected ? (wp.charging ? \"blue\" : \"green\") : \"red\",\n    shape: \"dot\",\n    text:\n        wp.car_state_label +\n        \" | \" + (wp.power_w ?? 0) + \" W\" +\n        \" | \" + wp.mode_label +\n        \" | \" + (wp.current_a ?? \"—\") + \" A\"\n});\n\nmsg.topic = \"wattpilot_data\";\nmsg.payload = wp;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 420,
+        "wires": [
+            [
+                "760d8dec84e56fe8"
+            ]
+        ]
+    },
+    {
+        "id": "760d8dec84e56fe8",
+        "type": "debug",
+        "z": "e7418f17a21aa1b7",
+        "name": "Wattpilot Daten",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 960,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "d52cac4202ff0204",
+        "type": "websocket-client",
+        "path": "ws://10.0.0.102/ws",
+        "tls": "",
+        "wholemsg": "false",
+        "hb": "30",
+        "subprotocol": "",
+        "headers": []
     }
 ]
